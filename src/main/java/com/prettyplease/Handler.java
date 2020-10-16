@@ -14,6 +14,11 @@ import java.util.Map;
 public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 
     private static final Logger LOG = LogManager.getLogger(Handler.class);
+    private String DB_HOST = System.getenv("DB_HOST");
+    private String DB_NAME = System.getenv("DB_NAME");
+    private String DB_USER = System.getenv("DB_USER");
+    private String DB_PASSWORD = System.getenv("DB_PASSWORD");
+
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         LOG.info("received: {}", input);
@@ -24,23 +29,27 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
         // build the sponsors list from the result set
         // return sponsors
         List<Sponsor> sponsors = new ArrayList<>();
+        String sponsorId = (String) ((Map)input.get("queryStringParameters")).get("sponsorId");
+        LOG.info("SponsorId: {}", sponsorId);
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager
-                    .getConnection("jdbc:mysql://localhost/prettyplease?"
-                            + "user=user&password=pw");
+                    .getConnection(String.format("jdbc:mysql://%s/%s?user=%s&password=%s", DB_HOST, DB_NAME, DB_USER, DB_PASSWORD));
             Statement statement = connection.createStatement();
 
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM prettyplease.Sponsor");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM prettyplease.Sponsor WHERE sponsorId = ?");
+            preparedStatement.setString(1, sponsorId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
 
 
             while (resultSet.next()) {
-                int sponsorId = resultSet.getInt("sponsorId");
+                int id = resultSet.getInt("sponsorId");
                 String name = resultSet.getString("name");
                 String description = resultSet.getString("description");
-                LOG.info("Sponsor: {} - {} - {}", sponsorId, name, description);
-                sponsors.add(new Sponsor(sponsorId, name, description));
+                LOG.info("Sponsor: {} - {} - {}", id, name, description);
+                sponsors.add(new Sponsor(id, name, description));
             }
         }
         catch (ClassNotFoundException | SQLException e) {

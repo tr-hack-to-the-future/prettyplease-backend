@@ -13,3 +13,5 @@ target
 # Serverless directories
 .serverless
 .idea
+
+config.dev.json
