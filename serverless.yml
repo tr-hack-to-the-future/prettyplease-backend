@@ -30,7 +30,7 @@ package:
   artifact: target/prettyplease-dev.jar
 
 functions:
-  hello:
+  sponsors:
     handler: com.prettyplease.Handler
     events:
       - http:
