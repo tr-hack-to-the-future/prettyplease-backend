@@ -16,10 +16,10 @@ Download or clone this repo.
 - Create a config.dev.json file at the project level containing the following name/value pairs:
 ```json
 {
-  "DB_HOST" : <database host name>,
-  "DB_NAME" : <database name>,
-  "DB_USER" : <database user>,
-  "DB_PASSWORD" : <database password>
+  "DB_HOST" : "<database_host_name>",
+  "DB_NAME" : "<database_name>",
+  "DB_USER" : "<database_user>",
+  "DB_PASSWORD" : "<database_password>"
 } 
 ```
 
