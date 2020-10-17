@@ -21,7 +21,13 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
-//        LOG.info("received: {}", input);
+        // TODO remove logging
+        LOG.info("\nreceived: {}\n", input);
+        String httpMethod = (String)input.get("httpMethod");
+        LOG.info("\nHttp Method: {}\n", httpMethod); // e.g. httpMethod=GET
+        LOG.info("\nResource: {}\n", (String)input.get("resource")); // e.g. {resource=/sponsor/{sponsorId}
+
+        // TODO rename this to SponsorHandler? One handler per event? GET, POST, UPDATE, DELETE?
 
         List<Sponsor> sponsors = new ArrayList<>();
         String sponsorId = (String) ((Map)input.get("pathParameters")).get("sponsorId");
@@ -39,7 +45,7 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
                 int id = resultSet.getInt("sponsorId");
                 String name = resultSet.getString("name");
                 String description = resultSet.getString("description");
-                LOG.info("Sponsor: {} - {} - {}", id, name, description);
+//                LOG.info("Sponsor: {} - {} - {}", id, name, description);
                 sponsors.add(new Sponsor(id, name, description));
             }
         }
