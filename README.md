@@ -35,9 +35,9 @@ serverless deploy
 #### Function 
 sponsors
 #### Handler: 
-com.prettyplease.Handler
+com.prettyplease.GetSponsorHandler
 
-#### Events
+#### REST API
 ```yaml
 type: http
 path: sponsor/{sponsorId}
@@ -46,7 +46,19 @@ method: get
 
 
 ### Serverless Framework cheat sheet
-serverless version - displays the version number of serverless framework
-serverless deploy - deploys from the current folder
-serverless log -f <function name> - shows logs
-serverless remove - removes everything
+Display the version number of serverless framework
+```yaml
+serverless version
+```
+Deploy from the current folder:
+```yaml
+serverless deploy 
+```
+check log file for a function (e.g. function name <em>getsponsor</em>)
+```yaml
+serverless logs -f getsponsor
+```
+Remove everything:
+```yaml
+serverless remove
+```

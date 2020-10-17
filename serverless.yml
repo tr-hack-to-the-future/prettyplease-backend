@@ -35,9 +35,65 @@ package:
   artifact: target/prettyplease-dev.jar
 
 functions:
-  sponsors:
-    handler: com.prettyplease.Handler
+  getsponsor:
+    handler: com.prettyplease.GetSponsorHandler
     events:
       - http:
-          path: sponsor/{sponsorId}
+          path: sponsors/{sponsorId}
           method: get
+
+#  listsponsors:
+#    handler: com.prettyplease.ListSponsorHandler
+#    events:
+#      - http:
+#          path: sponsors
+#          method: get
+#
+#  createsponsor:
+#    handler: com.prettyplease.CreateSponsorHandler
+#    events:
+#      - http:
+#          path: sponsors/create
+#          method: post
+#
+  getcharity:
+    handler: com.prettyplease.GetCharityHandler
+    events:
+      - http:
+          path: charities/{charityId}
+          method: get
+
+#  createcharity:
+#    handler: com.prettyplease.CreateCharityHandler
+#    events:
+#      - http:
+#          path: charities/create
+#          method: post
+#
+#  getrequest:
+#    handler: com.prettyplease.GetRequestHandler
+#    events:
+#      - http:
+#          path: requests/{requestId}
+#          method: get
+#
+#  listrequests:
+#    handler: com.prettyplease.ListRequestHandler
+#    events:
+#      - http:
+#          path: requests
+#          method: get
+#
+#  createrequest:
+#    handler: com.prettyplease.CreateRequestHandler
+#    events:
+#      - http:
+#          path: requests/create
+#          method: post
+#
+#  updaterequest:
+#    handler: com.prettyplease.UpdateRequestHandler
+#    events:
+#      - http:
+#          path: requests/{requestId}
+#          method: put
