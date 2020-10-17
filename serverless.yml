@@ -39,5 +39,5 @@ functions:
     handler: com.prettyplease.Handler
     events:
       - http:
-          path: sponsors
+          path: sponsor/{sponsorId}
           method: get

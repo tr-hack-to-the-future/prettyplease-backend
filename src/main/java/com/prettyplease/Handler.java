@@ -21,17 +21,10 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
-        LOG.info("received: {}", input);
+//        LOG.info("received: {}", input);
 
-        // create a database connection
-        // create a prepared statement
-        // run it to create a result set
-        // build the sponsors list from the result set
-        // return sponsors
         List<Sponsor> sponsors = new ArrayList<>();
-        String sponsorId = (String) ((Map)input.get("queryStringParameters")).get("sponsorId");
-        LOG.info("SponsorId: {}", sponsorId);
-
+        String sponsorId = (String) ((Map)input.get("pathParameters")).get("sponsorId");
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager
@@ -40,9 +33,7 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM prettyplease.Sponsor WHERE sponsorId = ?");
             preparedStatement.setString(1, sponsorId);
-
             ResultSet resultSet = preparedStatement.executeQuery();
-
 
             while (resultSet.next()) {
                 int id = resultSet.getInt("sponsorId");
