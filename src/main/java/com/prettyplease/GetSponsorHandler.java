@@ -23,12 +23,13 @@ public class GetSponsorHandler implements RequestHandler<Map<String, Object>, Ap
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
+// TODO remove logging
 //        LOG.info("\nreceived: {}\n", input);
 //        String httpMethod = (String)input.get("httpMethod");
 //        LOG.info("\nHttp Method: {}\n", httpMethod); // e.g. httpMethod=GET
 //        LOG.info("\nResource: {}\n", (String)input.get("resource")); // e.g. {resource=/sponsor/{sponsorId}
 
-        // TODO One handler per event? GET, POST, UPDATE, DELETE?
+
         List<Sponsor> sponsors = new ArrayList<>();
         String sponsorId = (String) ((Map)input.get("pathParameters")).get("sponsorId");
         try {

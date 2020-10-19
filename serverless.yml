@@ -49,13 +49,13 @@ functions:
 #          path: sponsors
 #          method: get
 #
-#  createsponsor:
-#    handler: com.prettyplease.CreateSponsorHandler
-#    events:
-#      - http:
-#          path: sponsors/create
-#          method: post
-#
+  createsponsor:
+    handler: com.prettyplease.CreateSponsorHandler
+    events:
+      - http:
+          path: sponsors
+          method: post
+
   getcharity:
     handler: com.prettyplease.GetCharityHandler
     events:
@@ -67,7 +67,7 @@ functions:
 #    handler: com.prettyplease.CreateCharityHandler
 #    events:
 #      - http:
-#          path: charities/create
+#          path: charities
 #          method: post
 #
 #  getrequest:
@@ -88,7 +88,7 @@ functions:
 #    handler: com.prettyplease.CreateRequestHandler
 #    events:
 #      - http:
-#          path: requests/create
+#          path: requests
 #          method: post
 #
 #  updaterequest:
@@ -96,4 +96,32 @@ functions:
 #    events:
 #      - http:
 #          path: requests/{requestId}
+#          method: put
+#
+#  getoffer:
+#    handler: com.prettyplease.GetOfferHandler
+#    events:
+#      - http:
+#          path: offers/{offerId}
+#          method: get
+
+#  listoffers:
+#    handler: com.prettyplease.ListOfferHandler
+#    events:
+#      - http:
+#          path: offers
+#          method: get
+#
+#  createoffer:
+#    handler: com.prettyplease.CreateOfferHandler
+#    events:
+#      - http:
+#          path: offers
+#          method: post
+#
+#  updateoffer:
+#    handler: com.prettyplease.UpdateOfferHandler
+#    events:
+#      - http:
+#          path: offers/{offerId}
 #          method: put
