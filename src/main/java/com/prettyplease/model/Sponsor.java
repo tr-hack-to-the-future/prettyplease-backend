@@ -4,14 +4,14 @@ import java.util.Date;
 
 public class Sponsor {
 
-    private int sponsorId;
+    private String sponsorId;
     private String name;
     private String description;
     private String imageUrl;
     private String webUrl;
     private Date createdAt;
 
-    public Sponsor(int sponsorId, String name, String description) {
+    public Sponsor(String sponsorId, String name, String description) {
         this.sponsorId = sponsorId;
         this.name = name;
         this.description = description;
@@ -29,7 +29,7 @@ public class Sponsor {
         this.createdAt = createdAt;
     }
 
-    public int getSponsorId() {
+    public String getSponsorId() {
         return sponsorId;
     }
 

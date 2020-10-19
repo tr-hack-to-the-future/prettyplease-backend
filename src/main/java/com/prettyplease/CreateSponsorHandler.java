@@ -56,9 +56,7 @@ public class CreateSponsorHandler implements RequestHandler<Map<String, Object>,
     }
 
     private void buildPreparedStatement(JSONObject sponsor, PreparedStatement preparedStatement) throws JSONException, SQLException {
-        // TODO change ID to String
-        String id = sponsor.getString("sponsorId");
-        preparedStatement.setInt(1, Integer.valueOf(id));
+        preparedStatement.setString(1, sponsor.getString("sponsorId"));
         preparedStatement.setString(2, sponsor.getString("name"));
         preparedStatement.setString(3, sponsor.getString("description"));
         preparedStatement.setString(4, sponsor.getString("imageUrl"));

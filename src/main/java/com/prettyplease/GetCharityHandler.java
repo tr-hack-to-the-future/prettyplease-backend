@@ -51,7 +51,7 @@ public class GetCharityHandler implements RequestHandler<Map<String, Object>, Ap
     }
 
     private void buildCharityFromDB(List<Charity> charities, ResultSet resultSet) throws SQLException {
-        int id = resultSet.getInt("charityId");
+        String id = resultSet.getString("charityId");
         String name = resultSet.getString("name");
         String description = resultSet.getString("description");
         String imageUrl = resultSet.getString("imageUrl");

@@ -58,7 +58,7 @@ public class GetSponsorHandler implements RequestHandler<Map<String, Object>, Ap
     }
 
     private void buildSponsorFromDB(List<Sponsor> sponsors, ResultSet resultSet) throws SQLException {
-        int id = resultSet.getInt("sponsorId");
+        String id = resultSet.getString("sponsorId");
         String name = resultSet.getString("name");
         String description = resultSet.getString("description");
         String imageUrl = resultSet.getString("imageUrl");

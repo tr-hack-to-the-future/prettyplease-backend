@@ -4,14 +4,14 @@ import java.util.Date;
 
 public class Charity {
 
-    private int charityId;
+    private String charityId;
     private String name;
     private String description;
     private String imageUrl;
     private String webUrl;
     private Date createdAt;
 
-    public Charity(int charityId, String name, String description) {
+    public Charity(String charityId, String name, String description) {
         this.charityId = charityId;
         this.name = name;
         this.description = description;
@@ -29,7 +29,7 @@ public class Charity {
         this.createdAt = createdAt;
     }
 
-    public int getCharityId() {
+    public String getCharityId() {
         return charityId;
     }
 
