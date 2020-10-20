@@ -30,18 +30,30 @@ serverless deploy
 ```
 
 
-## Lambda Functions
-
-#### Function 
-sponsors
-#### Handler: 
-com.prettyplease.GetSponsorHandler
-
-#### REST API
+## Lambda HTTP Functions
 ```yaml
-type: http
+function: getsponsor
+handler: com.prettyplease.SponsorHandler
 path: sponsor/{sponsorId}
 method: get
+
+function: createsponsor
+handler: com.prettyplease.SponsorHandler
+path: sponsors
+method: post
+
+function: getcharity
+handler: com.prettyplease.CharityHandler
+path: charity/{charityId}
+method: get
+
+function: getcharity
+handler: com.prettyplease.CharityHandler
+path: charities
+method: post
+
+
+
 ```
 
 
