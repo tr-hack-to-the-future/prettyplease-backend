@@ -55,6 +55,7 @@ functions:
       - http:
           path: sponsors
           method: post
+          cors: true
 
   getcharity:
     handler: com.prettyplease.CharityHandler
@@ -62,6 +63,7 @@ functions:
       - http:
           path: charities/{charityId}
           method: get
+          cors: true
 
   createcharity:
     handler: com.prettyplease.CharityHandler
@@ -69,6 +71,7 @@ functions:
       - http:
           path: charities
           method: post
+          cors: true
 
   getrequest:
     handler: com.prettyplease.RequestHandler
@@ -76,6 +79,7 @@ functions:
       - http:
           path: requests/{requestId}
           method: get
+          cors: true
 
 #  listrequests:
 #    handler: com.prettyplease.RequestHandler
@@ -90,6 +94,7 @@ functions:
       - http:
           path: requests
           method: post
+          cors: true
 
 #  updaterequest:
 #    handler: com.prettyplease.UpdateRequestHandler

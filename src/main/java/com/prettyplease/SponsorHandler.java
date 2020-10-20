@@ -9,10 +9,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 
@@ -50,10 +48,14 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
                 LOG.info("Problem parsing POST data: {}", e.getMessage());
             }
         }
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Headers", "Content-Type");
 
         return ApiGatewayResponse.builder()
                 .setStatusCode(200)
                 .setObjectBody(response)
+                .setHeaders(headers)
                 .build();
     }
 

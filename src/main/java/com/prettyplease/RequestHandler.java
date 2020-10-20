@@ -8,11 +8,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.sql.Date;
+import java.util.*;
 
 public class RequestHandler implements com.amazonaws.services.lambda.runtime.RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 
@@ -55,10 +52,14 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
                 LOG.info("Problem parsing POST data: {}", e.getMessage());
             }
         }
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Headers", "Content-Type");
 
         return ApiGatewayResponse.builder()
                 .setStatusCode(200)
                 .setObjectBody(response)
+                .setHeaders(headers)
                 .build();
     }
 
@@ -98,7 +99,7 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
         String requestStatus = resultSet.getString("requestStatus");
         Date requestDate = resultSet.getDate("requestDate");
         Date dueDate = resultSet.getDate("dueDate");
-        Date createdAt = resultSet.getTimestamp("createdAt");
+        java.util.Date createdAt = resultSet.getTimestamp("createdAt");
         // populate FundRequest object
         FundRequest fundRequest = new FundRequest(requestId, charityId, eventDescription);
         fundRequest.setIncentive(incentive);
