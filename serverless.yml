@@ -57,35 +57,35 @@ functions:
           method: post
 
   getcharity:
-    handler: com.prettyplease.GetCharityHandler
+    handler: com.prettyplease.CharityHandler
     events:
       - http:
           path: charities/{charityId}
           method: get
 
-#  createcharity:
-#    handler: com.prettyplease.CreateCharityHandler
-#    events:
-#      - http:
-#          path: charities
-#          method: post
-#
+  createcharity:
+    handler: com.prettyplease.CharityHandler
+    events:
+      - http:
+          path: charities
+          method: post
+
 #  getrequest:
-#    handler: com.prettyplease.GetRequestHandler
+#    handler: com.prettyplease.RequestHandler
 #    events:
 #      - http:
 #          path: requests/{requestId}
 #          method: get
 #
 #  listrequests:
-#    handler: com.prettyplease.ListRequestHandler
+#    handler: com.prettyplease.RequestHandler
 #    events:
 #      - http:
 #          path: requests
 #          method: get
 #
 #  createrequest:
-#    handler: com.prettyplease.CreateRequestHandler
+#    handler: com.prettyplease.RequestHandler
 #    events:
 #      - http:
 #          path: requests
