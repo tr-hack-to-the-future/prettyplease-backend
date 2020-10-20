@@ -23,8 +23,9 @@ public class CreateSponsorHandler implements RequestHandler<Map<String, Object>,
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
 // TODO remove logging
         LOG.info("\nreceived: {}\n", input.toString());
-        LOG.info("\nResource: {}\n", (String) input.get("resource")); // e.g. {resource=/sponsor/{sponsorId}
+        LOG.info("\nResource: {}\n", input.get("resource")); // e.g. {resource=/sponsor/{sponsorId}
 
+        // TODO extract method into unit testable components
         String body = (String) input.get("body");
         LOG.info("\nbody: {}\n", body); // e.g. POST JSON string
 
@@ -51,7 +52,7 @@ public class CreateSponsorHandler implements RequestHandler<Map<String, Object>,
 
         return ApiGatewayResponse.builder()
                 .setStatusCode(200)
-                .setObjectBody(body)
+                .setObjectBody("Sponsor Created")
                 .build();
     }
 
