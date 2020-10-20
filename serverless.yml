@@ -36,7 +36,7 @@ package:
 
 functions:
   getsponsor:
-    handler: com.prettyplease.GetSponsorHandler
+    handler: com.prettyplease.SponsorHandler
     events:
       - http:
           path: sponsors/{sponsorId}
@@ -50,7 +50,7 @@ functions:
 #          method: get
 #
   createsponsor:
-    handler: com.prettyplease.CreateSponsorHandler
+    handler: com.prettyplease.SponsorHandler
     events:
       - http:
           path: sponsors
