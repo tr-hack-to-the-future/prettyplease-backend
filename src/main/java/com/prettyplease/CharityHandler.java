@@ -21,7 +21,7 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
     private final String DB_NAME = System.getenv("DB_NAME");
     private final String DB_USER = System.getenv("DB_USER");
     private final String DB_PASSWORD = System.getenv("DB_PASSWORD");
-    private static final String getSql = "SELECT * FROM prettyplease.Charity WHERE charityId = ?";
+    private static final String getSql = "SELECT charityId, name, description, imageUrl, webUrl, createdAt FROM prettyplease.Charity WHERE charityId = ?";
     private static final String createSql = "INSERT INTO prettyplease.Charity (charityId, name, description, imageUrl, webUrl, createdAt) VALUES (?, ?, ?, ?, ?, current_timestamp());";
 
     @Override
@@ -40,7 +40,8 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
 
             try {
                 JSONObject postBody = new JSONObject((String) input.get("body"));
-                createCharity(postBody);
+                int rows = createCharity(postBody);
+                response = "Rows created: "  + rows;
             } catch (JSONException e) {
                 LOG.info("Problem parsing POST data: {}", e.getMessage());
             }
@@ -88,7 +89,8 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
     }
 
 
-    private void createCharity(JSONObject postBody) {
+    private int createCharity(JSONObject postBody) {
+        int rowsCreated = 0;
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager
@@ -103,9 +105,10 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
             preparedStatement.setString(4, postBody.getString("imageUrl"));
             preparedStatement.setString(5, postBody.getString("webUrl"));
 
-            int row = preparedStatement.executeUpdate();
+            rowsCreated = preparedStatement.executeUpdate();
         } catch (ClassNotFoundException | SQLException e) {
             LOG.error(e.getMessage());
         }
+        return rowsCreated;
     }
 }

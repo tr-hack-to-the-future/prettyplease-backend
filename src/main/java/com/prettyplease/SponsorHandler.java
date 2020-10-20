@@ -21,7 +21,7 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
     private String DB_NAME = System.getenv("DB_NAME");
     private String DB_USER = System.getenv("DB_USER");
     private String DB_PASSWORD = System.getenv("DB_PASSWORD");
-    private static final String getSql = "SELECT * FROM prettyplease.Sponsor WHERE sponsorId = ?";
+    private static final String getSql = "SELECT sponsorId, name, description, imageUrl, webUrl, createdAt FROM prettyplease.Sponsor WHERE sponsorId = ?";
     private static final String createSql = "INSERT INTO prettyplease.Sponsor (sponsorId, name, description, imageUrl, webUrl, createdAt) VALUES (?, ?, ?, ?, ?, current_timestamp());";
 
     @Override
@@ -44,7 +44,8 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
             // parse into JSON object
             try {
                 JSONObject postBody = new JSONObject((String) input.get("body"));
-                createSponsor(postBody);
+                int rows = createSponsor(postBody);
+                response = "Rows created: "  + rows;
             } catch (JSONException e) {
                 LOG.info("Problem parsing POST data: {}", e.getMessage());
             }
@@ -95,7 +96,8 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
     }
 
 
-    private void createSponsor(JSONObject postBody) {
+    private int createSponsor(JSONObject postBody) {
+        int rowsCreated = 0;
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager
@@ -110,9 +112,10 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
             preparedStatement.setString(4, postBody.getString("imageUrl"));
             preparedStatement.setString(5, postBody.getString("webUrl"));
 //            LOG.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + preparedStatement.toString() + "\n");
-            int row = preparedStatement.executeUpdate();
+            rowsCreated = preparedStatement.executeUpdate();
         } catch (ClassNotFoundException | SQLException e) {
             LOG.error(e.getMessage());
         }
+        return rowsCreated;
     }
 }

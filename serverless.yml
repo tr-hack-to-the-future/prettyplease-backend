@@ -70,27 +70,27 @@ functions:
           path: charities
           method: post
 
-#  getrequest:
-#    handler: com.prettyplease.RequestHandler
-#    events:
-#      - http:
-#          path: requests/{requestId}
-#          method: get
-#
+  getrequest:
+    handler: com.prettyplease.RequestHandler
+    events:
+      - http:
+          path: requests/{requestId}
+          method: get
+
 #  listrequests:
 #    handler: com.prettyplease.RequestHandler
 #    events:
 #      - http:
 #          path: requests
 #          method: get
-#
-#  createrequest:
-#    handler: com.prettyplease.RequestHandler
-#    events:
-#      - http:
-#          path: requests
-#          method: post
-#
+
+  createrequest:
+    handler: com.prettyplease.RequestHandler
+    events:
+      - http:
+          path: requests
+          method: post
+
 #  updaterequest:
 #    handler: com.prettyplease.UpdateRequestHandler
 #    events:
