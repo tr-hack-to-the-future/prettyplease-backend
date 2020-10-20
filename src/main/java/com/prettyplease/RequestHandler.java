@@ -8,7 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.*;
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.*;
 
 public class RequestHandler implements com.amazonaws.services.lambda.runtime.RequestHandler<Map<String, Object>, ApiGatewayResponse> {
@@ -21,17 +21,16 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
     private static final String getSql = "SELECT requestId, charityId, eventDescription, incentive, amountRequested, amountAgreed, isSingleEvent, durationInYears, agreedDurationInYears, requestStatus, requestDate, dueDate, createdAt " +
             "FROM prettyplease.FundRequest WHERE requestId = ?";
     private static final String createSql = "INSERT INTO prettyplease.FundRequest " +
-            "(requestId, charityId , eventDescription, incentive, amountRequested, amountAgreed, isSingleEvent, durationInYears, agreedDurationInYears, requestStatus, requestDate, dueDate) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp());";
-
+            "(requestId, charityId , eventDescription, incentive, amountRequested, amountAgreed, isSingleEvent, durationInYears, agreedDurationInYears, requestStatus, requestDate, dueDate, createdAt) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp())";
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
-// TODO remove logging
-        LOG.info("\nreceived: {}\n", input);
-//        String httpMethod = (String)input.get("httpMethod");
+//        TODO remove logging
+//        LOG.info("\nreceived: {}\n", input);
+//        String httpMethod = (String) input.get("httpMethod");
 //        LOG.info("\nHttp Method: {}\n", httpMethod); // e.g. httpMethod=GET
-//        LOG.info("\nResource: {}\n", (String)input.get("resource")); // e.g. {resource=/sponsor/{sponsorId}
+//        LOG.info("\nResource: {}\n", (String) input.get("resource")); // e.g. {resource=/sponsor/{sponsorId}
 
         String httpMethod = (String) input.get("httpMethod");
         Object response = null;
@@ -39,17 +38,12 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
         if ("GET".equalsIgnoreCase(httpMethod)) {
             response = getRequests(input);
         } else if ("POST".equalsIgnoreCase((httpMethod))) {
-//            String body = (String) input.get("body");
-//            LOG.info("\nbody: {}\n", body); // e.g. POST JSON string
-
             // parse into JSON object
             try {
                 JSONObject postBody = new JSONObject((String) input.get("body"));
-                int rows= createFundRequest(postBody);
-                response = "Rows created: "  + rows;
-
+                response = createFundRequest(postBody);
             } catch (JSONException e) {
-                LOG.info("Problem parsing POST data: {}", e.getMessage());
+                LOG.error("Problem parsing POST data: {}", e.getMessage());
             }
         }
         HashMap<String, String> headers = new HashMap<>();
@@ -97,8 +91,8 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
         int durationInYears = Integer.parseInt(resultSet.getString("durationInYears"));
         int agreedDurationInYears = Integer.parseInt(resultSet.getString("agreedDurationInYears"));
         String requestStatus = resultSet.getString("requestStatus");
-        Date requestDate = resultSet.getDate("requestDate");
-        Date dueDate = resultSet.getDate("dueDate");
+        java.util.Date requestDate = resultSet.getDate("requestDate");
+        java.util.Date dueDate = resultSet.getDate("dueDate");
         java.util.Date createdAt = resultSet.getTimestamp("createdAt");
         // populate FundRequest object
         FundRequest fundRequest = new FundRequest(requestId, charityId, eventDescription);
@@ -117,8 +111,8 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
     }
 
 
-    private int createFundRequest(JSONObject postBody) {
-        int rowsCreated = 0;
+    private String createFundRequest(JSONObject postBody) {
+        String id = "";
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager
@@ -133,20 +127,37 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
             preparedStatement.setString(2, postBody.getString("charityId"));
             preparedStatement.setString(3, postBody.getString("eventDescription"));
             preparedStatement.setString(4, postBody.getString("incentive"));
-            preparedStatement.setString(5, postBody.getString("amountRequested"));
-            preparedStatement.setString(6, postBody.getString("amountAgreed"));
-            preparedStatement.setString(7, postBody.getString("isSingleEvent"));
-            preparedStatement.setInt(8, Integer.parseInt(postBody.getString("durationInYears")));
-            preparedStatement.setInt(9, Integer.parseInt(postBody.getString("agreedDurationInYears")));
+            preparedStatement.setInt(5, postBody.getInt("amountRequested"));
+            preparedStatement.setInt(6, postBody.getInt("amountAgreed"));
+            // MySQL 5 uses TinyInt instead of Boolean
+            preparedStatement.setInt(7, (postBody.getBoolean("isSingleEvent") ? 1 : 0));
+            preparedStatement.setInt(8, postBody.getInt("durationInYears"));
+            preparedStatement.setInt(9, postBody.getInt("agreedDurationInYears"));
             preparedStatement.setString(10, postBody.getString("requestStatus"));
-            preparedStatement.setDate(11, java.sql.Date.valueOf(postBody.getString("requestDate")));
-            preparedStatement.setDate(13, java.sql.Date.valueOf(postBody.getString("dueDate")));
-
+            // TODO is request Date the current date?
+            // TODO fix these dates later
+//            LocalDate localDate = LocalDate.now();
+//            LOG.info("\nlocal date " + localDate + "\n");
+            preparedStatement.setDate(11, null);
+            preparedStatement.setDate(12, null);
+//            preparedStatement.setDate(11, java.sql.Date.valueOf(localDate));
+//            preparedStatement.setDate(12, parseDate(postBody.getString("dueDate")));
             LOG.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + preparedStatement.toString() + "\n");
-            rowsCreated = preparedStatement.executeUpdate();
+            int rowsCreated = preparedStatement.executeUpdate();
+            if (rowsCreated == 1) {
+                id = requestId.toString();
+            }
         } catch (ClassNotFoundException | SQLException e) {
             LOG.error(e.getMessage());
         }
-        return rowsCreated;
+        return id;
     }
+
+//    private java.sql.Date parseDate(String date) {
+//        if (date == null || "".equals(date)) {
+//            return null;
+//        } else {
+//            return java.sql.Date.valueOf(date);
+//        }
+//    }
 }

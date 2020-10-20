@@ -42,8 +42,7 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
             // parse into JSON object
             try {
                 JSONObject postBody = new JSONObject((String) input.get("body"));
-                int rows = createSponsor(postBody);
-                response = "Rows created: "  + rows;
+                response = createSponsor(postBody);
             } catch (JSONException e) {
                 LOG.info("Problem parsing POST data: {}", e.getMessage());
             }
@@ -98,8 +97,8 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
     }
 
 
-    private int createSponsor(JSONObject postBody) {
-        int rowsCreated = 0;
+    private String createSponsor(JSONObject postBody) {
+        String id = "";
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager
@@ -114,10 +113,13 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
             preparedStatement.setString(4, postBody.getString("imageUrl"));
             preparedStatement.setString(5, postBody.getString("webUrl"));
 //            LOG.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + preparedStatement.toString() + "\n");
-            rowsCreated = preparedStatement.executeUpdate();
+            int rowsCreated = preparedStatement.executeUpdate();
+            if (rowsCreated == 1) {
+                id = postBody.getString("sponsorId");
+            }
         } catch (ClassNotFoundException | SQLException e) {
             LOG.error(e.getMessage());
         }
-        return rowsCreated;
+        return id;
     }
 }

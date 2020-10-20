@@ -87,6 +87,15 @@ functions:
 #      - http:
 #          path: requests
 #          method: get
+#          cors: true
+
+#  listrequestsbystatus:
+#    handler: com.prettyplease.RequestHandler
+#    events:
+#      - http:
+#          path: requests/{status}??? or query parameter?
+#          method: get
+#          cors: true
 
   createrequest:
     handler: com.prettyplease.RequestHandler
@@ -102,6 +111,7 @@ functions:
 #      - http:
 #          path: requests/{requestId}
 #          method: put
+#          cors: true
 #
 #  getoffer:
 #    handler: com.prettyplease.GetOfferHandler
@@ -109,6 +119,7 @@ functions:
 #      - http:
 #          path: offers/{offerId}
 #          method: get
+#          cors: true
 
 #  listoffers:
 #    handler: com.prettyplease.ListOfferHandler
@@ -116,6 +127,7 @@ functions:
 #      - http:
 #          path: offers
 #          method: get
+#          cors: true
 #
 #  createoffer:
 #    handler: com.prettyplease.CreateOfferHandler
@@ -123,6 +135,7 @@ functions:
 #      - http:
 #          path: offers
 #          method: post
+#          cors: true
 #
 #  updateoffer:
 #    handler: com.prettyplease.UpdateOfferHandler
@@ -130,3 +143,4 @@ functions:
 #      - http:
 #          path: offers/{offerId}
 #          method: put
+#          cors: true
