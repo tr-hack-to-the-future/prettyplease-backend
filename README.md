@@ -52,6 +52,15 @@ handler: com.prettyplease.CharityHandler
 path: charities
 method: post
 
+function: getrequest
+handler: com.prettyplease.RequestHandler
+path: request/{requestId}
+method: get
+
+function: getrequest
+handler: com.prettyplease.RequestHandler
+path: requests
+method: post
 
 
 ```
