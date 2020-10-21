@@ -81,6 +81,16 @@ functions:
           method: get
           cors: true
 
+# requests joined with charity details
+  listcharityrequests:
+    handler: com.prettyplease.RequestHandler
+    events:
+      - http:
+          path: requests
+          method: get
+          cors: true
+
+
 #  listrequests:
 #    handler: com.prettyplease.RequestHandler
 #    events:

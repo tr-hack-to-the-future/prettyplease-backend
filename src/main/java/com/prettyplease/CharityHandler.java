@@ -9,8 +9,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 
@@ -59,16 +59,15 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
     private List<Charity> getCharities(Map<String, Object> input) {
         List<Charity> charities = new ArrayList<>();
         String charityId = (String) ((Map) input.get("pathParameters")).get("charityId");
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager
-                    .getConnection(String.format("jdbc:mysql://%s/%s?user=%s&password=%s", DB_HOST, DB_NAME, DB_USER, DB_PASSWORD));
-            PreparedStatement preparedStatement = connection.prepareStatement(getSql);
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(getSql);
+        ) {
             preparedStatement.setString(1, charityId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                buildCharityFromDB(charities, resultSet);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    buildCharityFromDB(charities, resultSet);
+                }
             }
         } catch (ClassNotFoundException | SQLException e) {
             LOG.error(e.getMessage());
@@ -94,13 +93,10 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
 
     private String createCharity(JSONObject postBody) {
         String id = "";
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager
-                    .getConnection(String.format("jdbc:mysql://%s/%s?user=%s&password=%s", DB_HOST, DB_NAME, DB_USER, DB_PASSWORD));
-//            Statement statement = connection.createStatement();
-
-            PreparedStatement preparedStatement = connection.prepareStatement(createSql);
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(createSql);
+        ) {
             // build the prepared statement from the JSON object
             preparedStatement.setString(1, postBody.getString("charityId"));
             preparedStatement.setString(2, postBody.getString("name"));
@@ -110,11 +106,18 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
 
             int rowsCreated = preparedStatement.executeUpdate();
             if (rowsCreated == 1) {
-                id =  postBody.getString("charityId");
+                id = postBody.getString("charityId");
             }
         } catch (ClassNotFoundException | SQLException e) {
             LOG.error(e.getMessage());
         }
         return id;
     }
+
+    private Connection getDatabaseConnection() throws SQLException, ClassNotFoundException {
+        Class.forName("com.mysql.jdbc.Driver");
+        return DriverManager
+                .getConnection(String.format("jdbc:mysql://%s/%s?user=%s&password=%s", DB_HOST, DB_NAME, DB_USER, DB_PASSWORD));
+    }
+
 }

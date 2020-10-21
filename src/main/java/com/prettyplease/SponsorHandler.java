@@ -9,8 +9,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 
@@ -62,18 +62,15 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
     private List<Sponsor> getSponsors(Map<String, Object> input) {
         List<Sponsor> sponsors = new ArrayList<>();
         String sponsorId = (String) ((Map) input.get("pathParameters")).get("sponsorId");
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager
-                    .getConnection(String.format("jdbc:mysql://%s/%s?user=%s&password=%s", DB_HOST, DB_NAME, DB_USER, DB_PASSWORD));
-            Statement statement = connection.createStatement();
-
-            PreparedStatement preparedStatement = connection.prepareStatement(getSql);
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(getSql);
+        ) {
             preparedStatement.setString(1, sponsorId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                buildSponsorFromDB(sponsors, resultSet);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    buildSponsorFromDB(sponsors, resultSet);
+                }
             }
         } catch (ClassNotFoundException | SQLException e) {
             LOG.error(e.getMessage());
@@ -96,16 +93,12 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
         sponsors.add(sponsor);
     }
 
-
     private String createSponsor(JSONObject postBody) {
         String id = "";
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager
-                    .getConnection(String.format("jdbc:mysql://%s/%s?user=%s&password=%s", DB_HOST, DB_NAME, DB_USER, DB_PASSWORD));
-            Statement statement = connection.createStatement();
-
-            PreparedStatement preparedStatement = connection.prepareStatement(createSql);
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(createSql);
+        ) {
             // build the prepared statement from the JSON object
             preparedStatement.setString(1, postBody.getString("sponsorId"));
             preparedStatement.setString(2, postBody.getString("name"));
@@ -119,7 +112,15 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
             }
         } catch (ClassNotFoundException | SQLException e) {
             LOG.error(e.getMessage());
+            // TODO add error messages - e.g. 409 status for duplicate PK on POST
         }
         return id;
     }
+
+    private Connection getDatabaseConnection() throws SQLException, ClassNotFoundException {
+        Class.forName("com.mysql.jdbc.Driver");
+        return DriverManager
+                .getConnection(String.format("jdbc:mysql://%s/%s?user=%s&password=%s", DB_HOST, DB_NAME, DB_USER, DB_PASSWORD));
+    }
+
 }

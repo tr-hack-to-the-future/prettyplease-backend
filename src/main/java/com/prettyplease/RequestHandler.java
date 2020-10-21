@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.*;
 
 public class RequestHandler implements com.amazonaws.services.lambda.runtime.RequestHandler<Map<String, Object>, ApiGatewayResponse> {
@@ -26,12 +25,6 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
-//        TODO remove logging
-//        LOG.info("\nreceived: {}\n", input);
-//        String httpMethod = (String) input.get("httpMethod");
-//        LOG.info("\nHttp Method: {}\n", httpMethod); // e.g. httpMethod=GET
-//        LOG.info("\nResource: {}\n", (String) input.get("resource")); // e.g. {resource=/sponsor/{sponsorId}
-
         String httpMethod = (String) input.get("httpMethod");
         Object response = null;
 
@@ -61,18 +54,15 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
     private List<FundRequest> getRequests(Map<String, Object> input) {
         List<FundRequest> requests = new ArrayList<>();
         String sponsorId = (String) ((Map) input.get("pathParameters")).get("requestId");
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager
-                    .getConnection(String.format("jdbc:mysql://%s/%s?user=%s&password=%s", DB_HOST, DB_NAME, DB_USER, DB_PASSWORD));
-            Statement statement = connection.createStatement();
-
-            PreparedStatement preparedStatement = connection.prepareStatement(getSql);
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(getSql);
+        ) {
             preparedStatement.setString(1, sponsorId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                buildFundRequestFromDB(requests, resultSet);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    buildFundRequestFromDB(requests, resultSet);
+                }
             }
         } catch (ClassNotFoundException | SQLException e) {
             LOG.error(e.getMessage());
@@ -113,13 +103,10 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
 
     private String createFundRequest(JSONObject postBody) {
         String id = "";
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager
-                    .getConnection(String.format("jdbc:mysql://%s/%s?user=%s&password=%s", DB_HOST, DB_NAME, DB_USER, DB_PASSWORD));
-            Statement statement = connection.createStatement();
-
-            PreparedStatement preparedStatement = connection.prepareStatement(createSql);
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(createSql);
+        ) {
             // build the prepared statement from the JSON object
             // create a random UUID for the requestI
             UUID requestId = UUID.randomUUID();
@@ -153,11 +140,11 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
         return id;
     }
 
-//    private java.sql.Date parseDate(String date) {
-//        if (date == null || "".equals(date)) {
-//            return null;
-//        } else {
-//            return java.sql.Date.valueOf(date);
-//        }
-//    }
+
+    private Connection getDatabaseConnection() throws SQLException, ClassNotFoundException {
+        Class.forName("com.mysql.jdbc.Driver");
+        return DriverManager
+                .getConnection(String.format("jdbc:mysql://%s/%s?user=%s&password=%s", DB_HOST, DB_NAME, DB_USER, DB_PASSWORD));
+    }
+
 }
