@@ -133,7 +133,7 @@ functions:
 #          cors: true
 
   listcharityoffers:
-    handler: com.prettyplease.OfferRequestHandler
+    handler: com.prettyplease.CharityOfferHandler
     events:
       - http:
           path: charityoffers/{charityId}

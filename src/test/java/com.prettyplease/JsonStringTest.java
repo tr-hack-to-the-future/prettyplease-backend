@@ -64,6 +64,5 @@ public class JsonStringTest {
     public void checkRequestStatus() {
         System.out.println(RequestStatus.ACCEPTED);
         assertEquals("ACCEPTED", RequestStatus.ACCEPTED.toString());
-
     }
 }

@@ -18,11 +18,18 @@ public class CharityOfferHandler implements com.amazonaws.services.lambda.runtim
     private String DB_NAME = System.getenv("DB_NAME");
     private String DB_USER = System.getenv("DB_USER");
     private String DB_PASSWORD = System.getenv("DB_PASSWORD");
-    private static final String getByCharityIdSql = "SELECT o.offerId, o.sponsorId, o.requestId, o.offerStatus, o.offerAmount, o.isSingleEvent as isOfferSingleEvent," +
-            " o.offerDurationInYears, o.createdAt, s.name as sponsorName, s.description as sponsorDescription, s.imageUrl as sponsorImageUrl, s.webUrl as sponsorWebUrl,\n" +
-            "           f.requestId, f.charityId, f.eventDescription, f.incentive, f.amountRequested, f.amountAgreed, f.isSingleEvent, f.durationInYears,\n" +
-            "         f.agreedDurationInYears, f.requestStatus, f.requestDate, f.dueDate FROM prettyplease.SponsorOffer o INNER JOIN prettyplease.Sponsor s " +
-            "ON o.sponsorId = s.sponsorId INNER JOIN prettyplease.FundRequest f ON o.requestId = f.requestId WHERE f.charityId = ? ORDER BY f.requestStatus, o.createdAt";
+//    private static final String getByCharityIdSql = "SELECT o.offerId, o.sponsorId, o.requestId, o.offerStatus, o.offerAmount, o.isSingleEvent as isOfferSingleEvent," +
+//            " o.offerDurationInYears, o.createdAt, s.name as sponsorName, s.description as sponsorDescription, s.imageUrl as sponsorImageUrl, s.webUrl as sponsorWebUrl,\n" +
+//            "           f.requestId, f.charityId, f.eventDescription, f.incentive, f.amountRequested, f.amountAgreed, f.isSingleEvent, f.durationInYears,\n" +
+//            "         f.agreedDurationInYears, f.requestStatus, f.requestDate, f.dueDate FROM prettyplease.SponsorOffer o INNER JOIN prettyplease.Sponsor s " +
+//            "ON o.sponsorId = s.sponsorId INNER JOIN prettyplease.FundRequest f ON o.requestId = f.requestId WHERE f.charityId = ? ORDER BY f.requestStatus, o.createdAt";
+    private static final String listCharityOffersSql = "SELECT o.offerId, o.sponsorId, o.requestId, o.offerStatus, o.offerAmount, o.isSingleEvent as isOfferSingleEvent, \n" +
+        " o.offerDurationInYears, o.createdAt, s.name as sponsorName, s.description as sponsorDescription, s.imageUrl as sponsorImageUrl, s.webUrl as sponsorWebUrl, \n" +
+        "           f.requestId, f.charityId, f.eventDescription, f.incentive, f.amountRequested, f.amountAgreed, f.isSingleEvent, f.durationInYears, \n" +
+        "         f.agreedDurationInYears, f.requestStatus, f.requestDate, f.dueDate, c.name as charityName, c.description as charityDescription, " +
+        "c.imageUrl as charityImageUrl,  c.webUrl as charityWebUrl FROM prettyplease.SponsorOffer o INNER JOIN prettyplease.Sponsor s \n" +
+        "ON o.sponsorId = s.sponsorId INNER JOIN prettyplease.FundRequest f ON o.requestId = f.requestId \n" +
+        "INNER JOIN prettyplease.Charity c ON f.charityId = c.charityId WHERE f.charityId = ? ORDER BY f.requestStatus, o.createdAt\n";
 
 
     @Override
@@ -61,7 +68,7 @@ public class CharityOfferHandler implements com.amazonaws.services.lambda.runtim
         String charityId = (String) ((Map) input.get("pathParameters")).get("charityId");
         try (
                 Connection connection = getDatabaseConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(getByCharityIdSql);
+                PreparedStatement preparedStatement = connection.prepareStatement(listCharityOffersSql);
         ) {
             preparedStatement.setString(1, charityId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -80,6 +87,7 @@ public class CharityOfferHandler implements com.amazonaws.services.lambda.runtim
         sponsorOfferCharityRequest.setSponsorId(resultSet.getString("sponsorId"));
         sponsorOfferCharityRequest.setRequestId(resultSet.getString("requestId"));
         sponsorOfferCharityRequest.setOfferStatus(resultSet.getString("offerStatus"));
+        sponsorOfferCharityRequest.setOfferAmount(Integer.parseInt(resultSet.getString("offerAmount")));
         sponsorOfferCharityRequest.setOfferSingleEvent(Boolean.parseBoolean(resultSet.getString("isOfferSingleEvent")));
         sponsorOfferCharityRequest.setOfferDurationInYears(Integer.parseInt(resultSet.getString("durationInYears")));
         sponsorOfferCharityRequest.setCreatedAt(resultSet.getTimestamp("createdAt"));
@@ -101,7 +109,11 @@ public class CharityOfferHandler implements com.amazonaws.services.lambda.runtim
         sponsorOfferCharityRequest.setRequestDate(resultSet.getDate("requestDate"));
         sponsorOfferCharityRequest.setDueDate(resultSet.getDate("dueDate"));
         sponsorOfferCharityRequest.setCreatedAt(resultSet.getTimestamp("createdAt"));
-
+        // Charity
+        sponsorOfferCharityRequest.setCharityName(resultSet.getString("charityName"));
+        sponsorOfferCharityRequest.setCharityDescription(resultSet.getString("charityDescription"));
+        sponsorOfferCharityRequest.setCharityImageUrl(resultSet.getString("charityImageUrl"));
+        sponsorOfferCharityRequest.setCharityWebUrl(resultSet.getString("charityWebUrl"));
         offers.add(sponsorOfferCharityRequest);
     }
 

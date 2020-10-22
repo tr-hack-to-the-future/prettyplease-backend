@@ -32,7 +32,12 @@ public class SponsorOfferCharityRequest {
     private Date requestDate;
     private Date dueDate;
 
-    // TODO add Charity table columns
+    // Charity
+    private String charityName;
+    private String charityDescription;
+    private String charityImageUrl;
+    private String charityWebUrl;
+
 
     public SponsorOfferCharityRequest() {
         super();
@@ -222,9 +227,41 @@ public class SponsorOfferCharityRequest {
         this.dueDate = dueDate;
     }
 
+    public String getCharityName() {
+        return charityName;
+    }
+
+    public void setCharityName(String charityName) {
+        this.charityName = charityName;
+    }
+
+    public String getCharityDescription() {
+        return charityDescription;
+    }
+
+    public void setCharityDescription(String charityDescription) {
+        this.charityDescription = charityDescription;
+    }
+
+    public String getCharityImageUrl() {
+        return charityImageUrl;
+    }
+
+    public void setCharityImageUrl(String charityImageUrl) {
+        this.charityImageUrl = charityImageUrl;
+    }
+
+    public String getCharityWebUrl() {
+        return charityWebUrl;
+    }
+
+    public void setCharityWebUrl(String charityWebUrl) {
+        this.charityWebUrl = charityWebUrl;
+    }
+
     @Override
     public String toString() {
-        return "OfferRequest{" +
+        return "SponsorOfferCharityRequest{" +
                 "offerId='" + offerId + '\'' +
                 ", sponsorId='" + sponsorId + '\'' +
                 ", requestId='" + requestId + '\'' +
@@ -248,6 +285,10 @@ public class SponsorOfferCharityRequest {
                 ", requestStatus='" + requestStatus + '\'' +
                 ", requestDate=" + requestDate +
                 ", dueDate=" + dueDate +
+                ", charityName='" + charityName + '\'' +
+                ", charityDescription='" + charityDescription + '\'' +
+                ", charityImageUrl='" + charityImageUrl + '\'' +
+                ", charityWebUrl='" + charityWebUrl + '\'' +
                 '}';
     }
 }
