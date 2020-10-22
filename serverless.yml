@@ -140,6 +140,15 @@ functions:
           method: get
           cors: true
 
+  listsponsoroffers:
+    handler: com.prettyplease.SponsorOfferHandler
+    events:
+      - http:
+          path: sponsoroffers/{sponsorId}
+          method: get
+          cors: true
+
+
 #  listoffers:
 #    handler: com.prettyplease.ListOfferHandler
 #    events:

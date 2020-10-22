@@ -11,24 +11,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CharityOfferHandler implements com.amazonaws.services.lambda.runtime.RequestHandler<Map<String, Object>, ApiGatewayResponse> {
+public class SponsorOfferHandler implements com.amazonaws.services.lambda.runtime.RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 
-    private static final Logger LOG = LogManager.getLogger(CharityOfferHandler.class);
+    private static final Logger LOG = LogManager.getLogger(SponsorOfferHandler.class);
     private String DB_HOST = System.getenv("DB_HOST");
     private String DB_NAME = System.getenv("DB_NAME");
     private String DB_USER = System.getenv("DB_USER");
     private String DB_PASSWORD = System.getenv("DB_PASSWORD");
-    private static final String listCharityOffersSql = "SELECT o.offerId, o.sponsorId, o.requestId, o.offerStatus, o.offerAmount, o.isSingleEvent as isOfferSingleEvent, \n" +
-        " o.offerDurationInYears, o.createdAt, s.name as sponsorName, s.description as sponsorDescription, s.imageUrl as sponsorImageUrl, s.webUrl as sponsorWebUrl, \n" +
-        "           f.requestId, f.charityId, f.eventDescription, f.incentive, f.amountRequested, f.amountAgreed, f.isSingleEvent, f.durationInYears, \n" +
-        "         f.agreedDurationInYears, f.requestStatus, f.requestDate, f.dueDate, c.name as charityName, c.description as charityDescription, " +
-        "c.imageUrl as charityImageUrl,  c.webUrl as charityWebUrl FROM prettyplease.SponsorOffer o INNER JOIN prettyplease.Sponsor s \n" +
-        "ON o.sponsorId = s.sponsorId INNER JOIN prettyplease.FundRequest f ON o.requestId = f.requestId \n" +
-        "INNER JOIN prettyplease.Charity c ON f.charityId = c.charityId WHERE f.charityId = ? ORDER BY f.requestStatus, o.createdAt\n";
+    private static final String listSponsorOffersSql = "SELECT o.offerId, o.sponsorId, o.requestId, o.offerStatus, o.offerAmount, o.isSingleEvent as isOfferSingleEvent, \n" +
+            " o.offerDurationInYears, o.createdAt, s.name as sponsorName, s.description as sponsorDescription, s.imageUrl as sponsorImageUrl, s.webUrl as sponsorWebUrl, \n" +
+            "           f.requestId, f.charityId, f.eventDescription, f.incentive, f.amountRequested, f.amountAgreed, f.isSingleEvent, f.durationInYears, \n" +
+            "         f.agreedDurationInYears, f.requestStatus, f.requestDate, f.dueDate, c.name as charityName, c.description as charityDescription, " +
+            "c.imageUrl as charityImageUrl,  c.webUrl as charityWebUrl FROM prettyplease.SponsorOffer o INNER JOIN prettyplease.Sponsor s \n" +
+            "ON o.sponsorId = s.sponsorId INNER JOIN prettyplease.FundRequest f ON o.requestId = f.requestId \n" +
+            "INNER JOIN prettyplease.Charity c ON f.charityId = c.charityId WHERE o.sponsorId = ? ORDER BY f.requestStatus, o.createdAt\n";
 
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
+        // TODO remove logging
+        LOG.info("\nreceived: {}\n", input);
         String httpMethod = (String) input.get("httpMethod");
         Object response = null;
         int statusCode = HttpStatus.OK;   // default to success
@@ -60,12 +62,12 @@ public class CharityOfferHandler implements com.amazonaws.services.lambda.runtim
 
     private List<SponsorOfferCharityRequest> getOffers(Map<String, Object> input) throws SQLException, ClassNotFoundException {
         List<SponsorOfferCharityRequest> requests = new ArrayList<>();
-        String charityId = (String) ((Map) input.get("pathParameters")).get("charityId");
+        String sponsorId = (String) ((Map) input.get("pathParameters")).get("sponsorId");
         try (
                 Connection connection = getDatabaseConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(listCharityOffersSql);
+                PreparedStatement preparedStatement = connection.prepareStatement(listSponsorOffersSql);
         ) {
-            preparedStatement.setString(1, charityId);
+            preparedStatement.setString(1, sponsorId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     buildOfferRequestFromDB(requests, resultSet);
