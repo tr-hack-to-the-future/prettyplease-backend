@@ -1,6 +1,7 @@
-package com.prettyplease.model;
+package com.prettyplease.model.tables;
 
-import java.sql.Timestamp;
+import com.prettyplease.model.RequestStatus;
+
 import java.util.Date;
 
 public class FundRequest {
@@ -14,14 +15,24 @@ public class FundRequest {
     private boolean isSingleEvent;
     private int durationInYears;
     private int agreedDurationInYears;
-    private String requestStatus; // TODO create eNum (OPEN, AGREED, CLOSED)?
+    private RequestStatus requestStatus;
     private Date requestDate;
     private Date dueDate;
     private Date createdAt;
 
-    public FundRequest(String requestId, String charityId, String eventDescription) {
+    public FundRequest() {
+        super();
+    }
+
+    public void setRequestId(String requestId) {
         this.requestId = requestId;
+    }
+
+    public void setCharityId(String charityId) {
         this.charityId = charityId;
+    }
+
+    public void setEventDescription(String eventDescription) {
         this.eventDescription = eventDescription;
     }
 
@@ -49,7 +60,7 @@ public class FundRequest {
         this.agreedDurationInYears = agreedDurationInYears;
     }
 
-    public void setRequestStatus(String requestStatus) {
+    public void setRequestStatus(RequestStatus requestStatus) {
         this.requestStatus = requestStatus;
     }
 
@@ -101,7 +112,7 @@ public class FundRequest {
         return agreedDurationInYears;
     }
 
-    public String getRequestStatus() {
+    public RequestStatus getRequestStatus() {
         return requestStatus;
     }
 
@@ -129,7 +140,7 @@ public class FundRequest {
                 ", isSingleEvent=" + isSingleEvent +
                 ", durationInYears=" + durationInYears +
                 ", agreedDurationInYears=" + agreedDurationInYears +
-                ", requestStatus='" + requestStatus + '\'' +
+                ", requestStatus='" + requestStatus.toString() + '\'' +
                 ", requestDate=" + requestDate +
                 ", dueDate=" + dueDate +
                 ", createdAt=" + createdAt +

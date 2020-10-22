@@ -42,13 +42,6 @@ functions:
           path: sponsors/{sponsorId}
           method: get
 
-#  listsponsors:
-#    handler: com.prettyplease.ListSponsorHandler
-#    events:
-#      - http:
-#          path: sponsors
-#          method: get
-#
   createsponsor:
     handler: com.prettyplease.SponsorHandler
     events:
@@ -73,6 +66,7 @@ functions:
           method: post
           cors: true
 
+# always going to get the request with the charity details
   getrequest:
     handler: com.prettyplease.RequestHandler
     events:
@@ -82,14 +76,21 @@ functions:
           cors: true
 
 # requests joined with charity details
-  listcharityrequests:
-    handler: com.prettyplease.RequestHandler
+  getsponsorrequest:
+    handler: com.prettyplease.CharityRequestHandler
     events:
       - http:
-          path: requests
+          path: sponsorrequests/{requestId}
           method: get
           cors: true
 
+#  listcharityrequests:
+#    handler: com.prettyplease.CharityRequestHandler
+#    events:
+#      - http:
+#          path: requests
+#          method: get
+#          cors: true
 
 #  listrequests:
 #    handler: com.prettyplease.RequestHandler
@@ -130,6 +131,14 @@ functions:
 #          path: offers/{offerId}
 #          method: get
 #          cors: true
+
+  listcharityoffers:
+    handler: com.prettyplease.OfferRequestHandler
+    events:
+      - http:
+          path: charityoffers/{charityId}
+          method: get
+          cors: true
 
 #  listoffers:
 #    handler: com.prettyplease.ListOfferHandler

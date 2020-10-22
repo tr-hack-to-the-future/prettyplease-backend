@@ -2,7 +2,7 @@ package com.prettyplease;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.prettyplease.model.Charity;
+import com.prettyplease.model.tables.Charity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
@@ -29,9 +29,21 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
 
         String httpMethod = (String) input.get("httpMethod");
         Object response = null;
+        int statusCode = HttpStatus.OK;   // default to success
 
         if ("GET".equalsIgnoreCase(httpMethod)) {
-            response = getCharities(input);
+            try {
+                response = getCharities(input);
+            } catch (ClassNotFoundException e) {
+                LOG.info("Problem setting up database connection: {}", e.getMessage());
+                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
+                response = e.getMessage();
+            } catch (SQLException e) {
+                LOG.error("Database/SQL problem: {}", e.getMessage());
+                statusCode = HttpStatus.CONFLICT;   // Conflict
+                response = e.getMessage();
+            }
+
         } else if ("POST".equalsIgnoreCase((httpMethod))) {
 //            String body = (String) input.get("body");
 //            LOG.info("\n body: {}\n", body); // e.g. POST JSON string
@@ -41,6 +53,16 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
                 response = createCharity(postBody);
             } catch (JSONException e) {
                 LOG.info("Problem parsing POST data: {}", e.getMessage());
+                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
+                response = e.getMessage();
+            } catch (ClassNotFoundException e) {
+                LOG.info("Problem setting up database connection: {}", e.getMessage());
+                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
+                response = e.getMessage();
+            } catch (SQLException e) {
+                LOG.error("Database/SQL problem: {}", e.getMessage());
+                statusCode = HttpStatus.CONFLICT;   // Conflict
+                response = e.getMessage();
             }
         }
 
@@ -56,7 +78,7 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
     }
 
 
-    private List<Charity> getCharities(Map<String, Object> input) {
+    private List<Charity> getCharities(Map<String, Object> input) throws SQLException, ClassNotFoundException {
         List<Charity> charities = new ArrayList<>();
         String charityId = (String) ((Map) input.get("pathParameters")).get("charityId");
         try (
@@ -69,8 +91,6 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
                     buildCharityFromDB(charities, resultSet);
                 }
             }
-        } catch (ClassNotFoundException | SQLException e) {
-            LOG.error(e.getMessage());
         }
         return charities;
     }
@@ -91,7 +111,7 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
     }
 
 
-    private String createCharity(JSONObject postBody) {
+    private String createCharity(JSONObject postBody) throws SQLException, ClassNotFoundException {
         String id = "";
         try (
                 Connection connection = getDatabaseConnection();
@@ -108,8 +128,6 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
             if (rowsCreated == 1) {
                 id = postBody.getString("charityId");
             }
-        } catch (ClassNotFoundException | SQLException e) {
-            LOG.error(e.getMessage());
         }
         return id;
     }

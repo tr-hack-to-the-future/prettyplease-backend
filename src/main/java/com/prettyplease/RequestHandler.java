@@ -1,7 +1,9 @@
 package com.prettyplease;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.prettyplease.model.FundRequest;
+import com.prettyplease.model.CharityRequest;
+import com.prettyplease.model.tables.FundRequest;
+import com.prettyplease.model.RequestStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
@@ -17,8 +19,15 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
     private String DB_NAME = System.getenv("DB_NAME");
     private String DB_USER = System.getenv("DB_USER");
     private String DB_PASSWORD = System.getenv("DB_PASSWORD");
-    private static final String getSql = "SELECT requestId, charityId, eventDescription, incentive, amountRequested, amountAgreed, isSingleEvent, durationInYears, agreedDurationInYears, requestStatus, requestDate, dueDate, createdAt " +
-            "FROM prettyplease.FundRequest WHERE requestId = ?";
+//    private static final String getSql = "SELECT requestId, charityId, eventDescription, incentive, amountRequested, amountAgreed, isSingleEvent, durationInYears, agreedDurationInYears, requestStatus, requestDate, dueDate, createdAt " +
+//            "FROM prettyplease.FundRequest WHERE requestId = ?";
+private static final String getSql = "SELECT f.requestId, f.charityId, f.eventDescription, f.incentive, " +
+        "f.amountRequested, f.amountAgreed, f.isSingleEvent, f.durationInYears, f.agreedDurationInYears, " +
+        "f.requestStatus, f.requestDate, f.dueDate, f.createdAt, " +
+        "c.name as charityName, c.description as charityDescription, " +
+        "c.imageUrl as charityImgUrl, c.webUrl as charityWebUrl \n" +
+        "FROM prettyplease.FundRequest f INNER JOIN prettyplease.Charity c\n" +
+        "ON c.charityId = f.charityId WHERE requestId = ?";
     private static final String createSql = "INSERT INTO prettyplease.FundRequest " +
             "(requestId, charityId , eventDescription, incentive, amountRequested, amountAgreed, isSingleEvent, durationInYears, agreedDurationInYears, requestStatus, requestDate, dueDate, createdAt) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp())";
@@ -27,16 +36,36 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         String httpMethod = (String) input.get("httpMethod");
         Object response = null;
+        int statusCode = HttpStatus.OK;   // default to success
 
         if ("GET".equalsIgnoreCase(httpMethod)) {
-            response = getRequests(input);
+            try {
+                response = getRequests(input);
+            } catch (ClassNotFoundException e) {
+                LOG.info("Problem setting up database connection: {}", e.getMessage());
+                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
+                response = e.getMessage();
+            } catch (SQLException e) {
+                LOG.error("Database/SQL problem: {}", e.getMessage());
+                statusCode = HttpStatus.CONFLICT;   // Conflict
+                response = e.getMessage();
+            }
         } else if ("POST".equalsIgnoreCase((httpMethod))) {
             // parse into JSON object
             try {
-                JSONObject postBody = new JSONObject((String) input.get("body"));
-                response = createFundRequest(postBody);
+                response = createFundRequest((String) input.get("body"));
             } catch (JSONException e) {
                 LOG.error("Problem parsing POST data: {}", e.getMessage());
+                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
+                response = e.getMessage();
+            } catch (ClassNotFoundException e) {
+                LOG.info("Problem setting up database connection: {}", e.getMessage());
+                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
+                response = e.getMessage();
+            } catch (SQLException e) {
+                LOG.error("Database/SQL problem: {}", e.getMessage());
+                statusCode = HttpStatus.CONFLICT;   // Conflict
+                response = e.getMessage();
             }
         }
         HashMap<String, String> headers = new HashMap<>();
@@ -50,25 +79,61 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
                 .build();
     }
 
-
-    private List<FundRequest> getRequests(Map<String, Object> input) {
-        List<FundRequest> requests = new ArrayList<>();
-        String sponsorId = (String) ((Map) input.get("pathParameters")).get("requestId");
+    private List<CharityRequest> getRequests(Map<String, Object> input) throws SQLException, ClassNotFoundException {
+        List<CharityRequest> requests = new ArrayList<>();
+        String requestId = (String) ((Map) input.get("pathParameters")).get("requestId");
         try (
                 Connection connection = getDatabaseConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(getSql);
         ) {
-            preparedStatement.setString(1, sponsorId);
+            preparedStatement.setString(1, requestId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    buildFundRequestFromDB(requests, resultSet);
+                    buildCharityFundRequestFromDB(requests, resultSet);
                 }
             }
-        } catch (ClassNotFoundException | SQLException e) {
-            LOG.error(e.getMessage());
         }
         return requests;
     }
+
+    private void buildCharityFundRequestFromDB(List<CharityRequest> requests, ResultSet resultSet) throws SQLException {
+        // populate CharityFundRequest object
+        CharityRequest charityRequest = new CharityRequest(resultSet.getString("requestId"),
+                resultSet.getString("charityId"), resultSet.getString("eventDescription"));
+        charityRequest.setIncentive(resultSet.getString("incentive"));
+        charityRequest.setAmountRequested(Integer.parseInt(resultSet.getString("amountRequested")));
+        charityRequest.setAmountAgreed(Integer.parseInt(resultSet.getString("amountAgreed")));
+        charityRequest.setSingleEvent(Boolean.parseBoolean(resultSet.getString("isSingleEvent")));
+        charityRequest.setDurationInYears(Integer.parseInt(resultSet.getString("durationInYears")));
+        charityRequest.setAgreedDurationInYears(Integer.parseInt(resultSet.getString("agreedDurationInYears")));
+        charityRequest.setRequestStatus(resultSet.getString("requestStatus"));
+        charityRequest.setRequestDate(resultSet.getDate("requestDate"));
+        charityRequest.setDueDate(resultSet.getDate("dueDate"));
+        charityRequest.setCreatedAt(resultSet.getTimestamp("createdAt"));
+        charityRequest.setCharityName(resultSet.getString("charityName"));
+        charityRequest.setCharityDescription(resultSet.getString("charityDescription"));
+        charityRequest.setCharityImageUrl(resultSet.getString("charityImgUrl"));
+        charityRequest.setCharityWebUrl(resultSet.getString("charityWebUrl"));
+
+        requests.add(charityRequest);
+    }
+
+//    private List<FundRequest> getRequests(Map<String, Object> input) throws SQLException, ClassNotFoundException {
+//        List<FundRequest> requests = new ArrayList<>();
+//        String requestId = (String) ((Map) input.get("pathParameters")).get("requestId");
+//        try (
+//                Connection connection = getDatabaseConnection();
+//                PreparedStatement preparedStatement = connection.prepareStatement(getSql);
+//        ) {
+//            preparedStatement.setString(1, requestId);
+//            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+//                while (resultSet.next()) {
+//                    buildFundRequestFromDB(requests, resultSet);
+//                }
+//            }
+//        }
+//        return requests;
+//    }
 
     private void buildFundRequestFromDB(List<FundRequest> requests, ResultSet resultSet) throws SQLException {
         String requestId = resultSet.getString("requestId");
@@ -85,14 +150,17 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
         java.util.Date dueDate = resultSet.getDate("dueDate");
         java.util.Date createdAt = resultSet.getTimestamp("createdAt");
         // populate FundRequest object
-        FundRequest fundRequest = new FundRequest(requestId, charityId, eventDescription);
+        FundRequest fundRequest = new FundRequest();
+        fundRequest.setRequestId(requestId);
+        fundRequest.setCharityId(charityId);
+        fundRequest.setEventDescription(eventDescription);
         fundRequest.setIncentive(incentive);
         fundRequest.setAmountRequested(amountRequested);
         fundRequest.setAmountAgreed(amountAgreed);
         fundRequest.setSingleEvent(isSingleEvent);
         fundRequest.setDurationInYears(durationInYears);
         fundRequest.setAgreedDurationInYears(agreedDurationInYears);
-        fundRequest.setRequestStatus(requestStatus);
+        fundRequest.setRequestStatus(RequestStatus.valueOf(requestStatus.toUpperCase()));
         fundRequest.setRequestDate(requestDate);
         fundRequest.setDueDate(dueDate);
         fundRequest.setCreatedAt(createdAt);
@@ -101,7 +169,8 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
     }
 
 
-    private String createFundRequest(JSONObject postBody) {
+    private String createFundRequest(String body) throws SQLException, ClassNotFoundException {
+        JSONObject postBody = new JSONObject(body);
         String id = "";
         try (
                 Connection connection = getDatabaseConnection();
@@ -134,8 +203,6 @@ public class RequestHandler implements com.amazonaws.services.lambda.runtime.Req
             if (rowsCreated == 1) {
                 id = requestId.toString();
             }
-        } catch (ClassNotFoundException | SQLException e) {
-            LOG.error(e.getMessage());
         }
         return id;
     }

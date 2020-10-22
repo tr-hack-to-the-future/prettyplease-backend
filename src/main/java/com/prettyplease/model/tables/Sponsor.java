@@ -1,18 +1,22 @@
-package com.prettyplease.model;
+package com.prettyplease.model.tables;
 
 import java.util.Date;
 
-public class Charity {
+public class Sponsor {
 
-    private String charityId;
+    private String sponsorId;
     private String name;
     private String description;
     private String imageUrl;
     private String webUrl;
     private Date createdAt;
 
-    public Charity(String charityId, String name, String description) {
-        this.charityId = charityId;
+    public Sponsor() {
+        super();
+    }
+
+    public Sponsor(String sponsorId, String name, String description) {
+        this.sponsorId = sponsorId;
         this.name = name;
         this.description = description;
     }
@@ -29,8 +33,8 @@ public class Charity {
         this.createdAt = createdAt;
     }
 
-    public String getCharityId() {
-        return charityId;
+    public String getSponsorId() {
+        return sponsorId;
     }
 
     public String getName() {
@@ -55,8 +59,8 @@ public class Charity {
 
     @Override
     public String toString() {
-        return "Charity{" +
-                "charityId=" + charityId +
+        return "Sponsor{" +
+                "sponsorId=" + sponsorId +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +

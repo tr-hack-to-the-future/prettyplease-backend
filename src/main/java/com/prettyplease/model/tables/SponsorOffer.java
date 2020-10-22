@@ -1,4 +1,4 @@
-package com.prettyplease.model;
+package com.prettyplease.model.tables;
 
 import java.util.Date;
 
@@ -12,6 +12,10 @@ public class SponsorOffer {
     private boolean isSingleEvent;
     private int offerDurationInYears;
     private Date createdAt;
+
+    public SponsorOffer() {
+        super();
+    }
 
     public SponsorOffer(String offerId, String sponsorId, String requestId, String offerStatus) {
         this.offerId = offerId;

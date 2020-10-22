@@ -2,12 +2,12 @@ package com.prettyplease;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.prettyplease.model.Sponsor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.prettyplease.model.tables.Sponsor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
@@ -32,19 +32,37 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
 
         String httpMethod = (String) input.get("httpMethod");
         Object response = null;
+        int statusCode = HttpStatus.OK;   // default to success
 
         if ("GET".equalsIgnoreCase(httpMethod)) {
-            response = getSponsors(input);
+            try {
+                response = getSponsors(input);
+            } catch (ClassNotFoundException e) {
+                LOG.info("Problem setting up database connection: {}", e.getMessage());
+                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
+                response = e.getMessage();
+            } catch (SQLException e) {
+                LOG.error("Database/SQL problem: {}", e.getMessage());
+                statusCode = HttpStatus.CONFLICT;   // Conflict
+                response = e.getMessage();
+            }
         } else if ("POST".equalsIgnoreCase((httpMethod))) {
 //            String body = (String) input.get("body");
 //            LOG.info("\nbody: {}\n", body); // e.g. POST JSON string
-
-            // parse into JSON object
             try {
-                JSONObject postBody = new JSONObject((String) input.get("body"));
-                response = createSponsor(postBody);
-            } catch (JSONException e) {
-                LOG.info("Problem parsing POST data: {}", e.getMessage());
+                response = createSponsor((String) input.get("body"));
+            } catch (IOException e) {
+                LOG.info("Problem parsing request: {}", e.getMessage());
+                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
+                response = e.getMessage();
+            } catch (ClassNotFoundException e) {
+                LOG.info("Problem setting up database connection: {}", e.getMessage());
+                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
+                response = e.getMessage();
+            } catch (SQLException e) {
+                LOG.error("Database/SQL problem: {}", e.getMessage());
+                statusCode = HttpStatus.CONFLICT;   // Conflict
+                response = e.getMessage();
             }
         }
         HashMap<String, String> headers = new HashMap<>();
@@ -52,14 +70,14 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
         headers.put("Access-Control-Allow-Headers", "Content-Type");
 
         return ApiGatewayResponse.builder()
-                .setStatusCode(200)
+                .setStatusCode(statusCode)
                 .setObjectBody(response)
                 .setHeaders(headers)
                 .build();
     }
 
 
-    private List<Sponsor> getSponsors(Map<String, Object> input) {
+    private List<Sponsor> getSponsors(Map<String, Object> input) throws SQLException, ClassNotFoundException {
         List<Sponsor> sponsors = new ArrayList<>();
         String sponsorId = (String) ((Map) input.get("pathParameters")).get("sponsorId");
         try (
@@ -72,8 +90,6 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
                     buildSponsorFromDB(sponsors, resultSet);
                 }
             }
-        } catch (ClassNotFoundException | SQLException e) {
-            LOG.error(e.getMessage());
         }
         return sponsors;
     }
@@ -93,26 +109,42 @@ public class SponsorHandler implements RequestHandler<Map<String, Object>, ApiGa
         sponsors.add(sponsor);
     }
 
-    private String createSponsor(JSONObject postBody) {
+    private String createSponsor(String body) throws ClassNotFoundException, SQLException, IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        Sponsor sponsor = mapper.readValue(body, Sponsor.class);
+
+//        JSONObject postBody = new JSONObject(body);
         String id = "";
         try (
                 Connection connection = getDatabaseConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(createSql);
         ) {
             // build the prepared statement from the JSON object
-            preparedStatement.setString(1, postBody.getString("sponsorId"));
-            preparedStatement.setString(2, postBody.getString("name"));
-            preparedStatement.setString(3, postBody.getString("description"));
-            preparedStatement.setString(4, postBody.getString("imageUrl"));
-            preparedStatement.setString(5, postBody.getString("webUrl"));
-//            LOG.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + preparedStatement.toString() + "\n");
+            preparedStatement.setString(1, sponsor.getSponsorId());
+            preparedStatement.setString(2, sponsor.getName());
+            preparedStatement.setString(3, sponsor.getDescription());
+            preparedStatement.setString(4, sponsor.getImageUrl());
+            preparedStatement.setString(5, sponsor.getWebUrl());
+            LOG.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + preparedStatement.toString() + "\n");
+
+//        JSONObject postBody = new JSONObject(body);
+//        String id = "";
+//        try (
+//                Connection connection = getDatabaseConnection();
+//                PreparedStatement preparedStatement = connection.prepareStatement(createSql);
+//        ) {
+//            // build the prepared statement from the JSON object
+//            preparedStatement.setString(1, postBody.getString("sponsorId"));
+//            preparedStatement.setString(2, postBody.getString("name"));
+//            preparedStatement.setString(3, postBody.getString("description"));
+//            preparedStatement.setString(4, postBody.getString("imageUrl"));
+//            preparedStatement.setString(5, postBody.getString("webUrl"));
+////            LOG.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + preparedStatement.toString() + "\n");
             int rowsCreated = preparedStatement.executeUpdate();
             if (rowsCreated == 1) {
-                id = postBody.getString("sponsorId");
+//                id = postBody.getString("sponsorId");
+                id = sponsor.getSponsorId();
             }
-        } catch (ClassNotFoundException | SQLException e) {
-            LOG.error(e.getMessage());
-            // TODO add error messages - e.g. 409 status for duplicate PK on POST
         }
         return id;
     }
