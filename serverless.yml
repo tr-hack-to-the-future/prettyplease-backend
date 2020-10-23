@@ -35,6 +35,7 @@ package:
   artifact: target/prettyplease-dev.jar
 
 functions:
+# GET
 # sponsor table
   getsponsor:
     handler: com.prettyplease.SponsorHandler
@@ -43,14 +44,6 @@ functions:
           path: sponsors/{sponsorId}
           method: get
 
-  createsponsor:
-    handler: com.prettyplease.SponsorHandler
-    events:
-      - http:
-          path: sponsors
-          method: post
-          cors: true
-
 # charity table
   getcharity:
     handler: com.prettyplease.CharityHandler
@@ -58,23 +51,6 @@ functions:
       - http:
           path: charities/{charityId}
           method: get
-          cors: true
-
-  createcharity:
-    handler: com.prettyplease.CharityHandler
-    events:
-      - http:
-          path: charities
-          method: post
-          cors: true
-
-  # fundrequest table
-  createrequest:
-    handler: com.prettyplease.RequestHandler
-    events:
-      - http:
-          path: requests
-          method: post
           cors: true
 
 # detailed responses are multiple joined tables
@@ -122,6 +98,32 @@ functions:
           path: sponsoroffers/{sponsorId}
           method: get
           cors: true
+
+# POST
+  createsponsor:
+    handler: com.prettyplease.SponsorHandler
+    events:
+      - http:
+          path: sponsors
+          method: post
+          cors: true
+
+  createcharity:
+    handler: com.prettyplease.CharityHandler
+    events:
+      - http:
+          path: charities
+          method: post
+          cors: true
+
+  createrequest:
+    handler: com.prettyplease.RequestHandler
+    events:
+      - http:
+          path: requests
+          method: post
+          cors: true
+
 
 
 #  listrequests:

@@ -29,6 +29,9 @@ To deploy the functions run:
 serverless deploy 
 ```
 
+## REST API
+The definition of the REST API can be found [here](./REST API README.md).
+
 
 ## Lambda HTTP Functions
 ```yaml
@@ -37,32 +40,93 @@ handler: com.prettyplease.SponsorHandler
 path: sponsor/{sponsorId}
 method: get
 
-function: createsponsor
-handler: com.prettyplease.SponsorHandler
-path: sponsors
-method: post
+# GET
+# sponsor table
+  getsponsor:
+    handler: com.prettyplease.SponsorHandler
+    events:
+      - http:
+          path: sponsors/{sponsorId}
+          method: get
 
-function: getcharity
-handler: com.prettyplease.CharityHandler
-path: charity/{charityId}
-method: get
+# charity table
+  getcharity:
+    handler: com.prettyplease.CharityHandler
+    events:
+      - http:
+          path: charities/{charityId}
+          method: get
+          cors: true
 
-function: getcharity
-handler: com.prettyplease.CharityHandler
-path: charities
-method: post
+# get the request including the charity details
+  getrequest:
+    handler: com.prettyplease.RequestHandler
+    events:
+      - http:
+          path: requests/{requestId}
+          method: get
+          cors: true
 
-function: getrequest
-handler: com.prettyplease.RequestHandler
-path: request/{requestId}
-method: get
+# get detailed request by requestId
+  getsponsorrequest:
+    handler: com.prettyplease.CharityRequestHandler
+    events:
+      - http:
+          path: sponsorrequests/{requestId}
+          method: get
+          cors: true
 
-function: getrequest
-handler: com.prettyplease.RequestHandler
-path: requests
-method: post
+# list of detailed requests
+  listdetailedrequests:
+    handler: com.prettyplease.CharityRequestHandler
+    events:
+      - http:
+          path: requests
+          method: get
+          cors: true
 
+  # list of detailed offers by charityid
+  listcharityoffers:
+    handler: com.prettyplease.CharityOfferHandler
+    events:
+      - http:
+          path: charityoffers/{charityId}
+          method: get
+          cors: true
 
+# list of detailed offers by sponsorid
+  listsponsoroffers:
+    handler: com.prettyplease.SponsorOfferHandler
+    events:
+      - http:
+          path: sponsoroffers/{sponsorId}
+          method: get
+          cors: true
+
+# POST
+  createsponsor:
+    handler: com.prettyplease.SponsorHandler
+    events:
+      - http:
+          path: sponsors
+          method: post
+          cors: true
+
+  createcharity:
+    handler: com.prettyplease.CharityHandler
+    events:
+      - http:
+          path: charities
+          method: post
+          cors: true
+
+  createrequest:
+    handler: com.prettyplease.RequestHandler
+    events:
+      - http:
+          path: requests
+          method: post
+          cors: true
 ```
 
 
