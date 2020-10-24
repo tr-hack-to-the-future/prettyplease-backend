@@ -36,7 +36,7 @@ public class SponsorServiceTest {
     }
 
     @Test
-    void test() throws SQLException, ClassNotFoundException {
+    void testSuccessfullyReturnsList() throws SQLException, ClassNotFoundException {
         Mockito.when(DriverManager.getConnection(Mockito.anyString())).thenReturn(mockConnection);
         Mockito.when(mockConnection.prepareStatement(Mockito.anyString())).thenReturn(mockPreparedStatement);
         Mockito.when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
@@ -45,7 +45,30 @@ public class SponsorServiceTest {
 
         List<Sponsor> sponsors = sponsorService.getSponsors("SPON001");
         assertEquals(1, sponsors.size());
-
     }
+
+    @Test
+    void testSuccessfullyReturnsListWithData() throws SQLException, ClassNotFoundException {
+        Mockito.when(DriverManager.getConnection(Mockito.anyString())).thenReturn(mockConnection);
+        Mockito.when(mockConnection.prepareStatement(Mockito.anyString())).thenReturn(mockPreparedStatement);
+        Mockito.when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
+        Mockito.when(mockResultSet.next()).thenReturn(true).thenReturn(false);
+        Mockito.when(mockResultSet.getString("sponsorId")).thenReturn("TEST VALUE");
+
+        List<Sponsor> sponsors = sponsorService.getSponsors("SPON001");
+        assertEquals("TEST VALUE", sponsors.get(0).getSponsorId());
+    }
+
+    @Test
+    void testSuccessfullyReturnsEmptyListWithNoData() throws SQLException, ClassNotFoundException {
+        Mockito.when(DriverManager.getConnection(Mockito.anyString())).thenReturn(mockConnection);
+        Mockito.when(mockConnection.prepareStatement(Mockito.anyString())).thenReturn(mockPreparedStatement);
+        Mockito.when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
+        Mockito.when(mockResultSet.next()).thenReturn(false);
+
+        List<Sponsor> sponsors = sponsorService.getSponsors("SPON001");
+        assertEquals(0, sponsors.size());
+    }
+
 
 }

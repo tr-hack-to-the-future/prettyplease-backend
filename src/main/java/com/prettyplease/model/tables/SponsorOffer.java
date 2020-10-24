@@ -1,5 +1,7 @@
 package com.prettyplease.model.tables;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Date;
 
 public class SponsorOffer {
@@ -28,8 +30,13 @@ public class SponsorOffer {
         this.offerAmount = offerAmount;
     }
 
-    public void setSingleEvent(boolean singleEvent) {
-        isSingleEvent = singleEvent;
+//    @JsonProperty("isSingleEvent")
+//    public void setIsSingleEvent(String singleEvent) {
+//        isSingleEvent = ("1".equals(singleEvent) ? true : false);
+//    }
+
+    public void setIsSingleEvent(boolean isSingleEvent) {
+        isSingleEvent = isSingleEvent;
     }
 
     public void setOfferDurationInYears(int offerDurationInYears) {

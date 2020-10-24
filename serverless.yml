@@ -124,6 +124,14 @@ functions:
           method: post
           cors: true
 
+  createoffer:
+    handler: com.prettyplease.OfferHandler
+    events:
+      - http:
+          path: offers
+          method: post
+          cors: true
+
 
 
 #  listrequests:

@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+// Created as an example of unit testing of database services with mocks
+// TODO complete switch from Handlers into services, including update of serverless.yml
 public class SponsorServiceImpl {
     private static final Logger LOG = LogManager.getLogger(SponsorServiceImpl.class);
 

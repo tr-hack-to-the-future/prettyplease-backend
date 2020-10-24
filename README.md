@@ -56,7 +56,6 @@ method: get
       - http:
           path: charities/{charityId}
           method: get
-          cors: true
 
 # get the request including the charity details
   getrequest:
@@ -65,7 +64,6 @@ method: get
       - http:
           path: requests/{requestId}
           method: get
-          cors: true
 
 # get detailed request by requestId
   getsponsorrequest:
@@ -74,7 +72,6 @@ method: get
       - http:
           path: sponsorrequests/{requestId}
           method: get
-          cors: true
 
 # list of detailed requests
   listdetailedrequests:
@@ -83,7 +80,6 @@ method: get
       - http:
           path: requests
           method: get
-          cors: true
 
   # list of detailed offers by charityid
   listcharityoffers:
@@ -92,7 +88,6 @@ method: get
       - http:
           path: charityoffers/{charityId}
           method: get
-          cors: true
 
 # list of detailed offers by sponsorid
   listsponsoroffers:
@@ -101,7 +96,6 @@ method: get
       - http:
           path: sponsoroffers/{sponsorId}
           method: get
-          cors: true
 
 # POST
   createsponsor:
@@ -110,7 +104,6 @@ method: get
       - http:
           path: sponsors
           method: post
-          cors: true
 
   createcharity:
     handler: com.prettyplease.CharityHandler
@@ -118,7 +111,6 @@ method: get
       - http:
           path: charities
           method: post
-          cors: true
 
   createrequest:
     handler: com.prettyplease.RequestHandler
@@ -126,7 +118,13 @@ method: get
       - http:
           path: requests
           method: post
-          cors: true
+
+  createoffer:
+    handler: com.prettyplease.OfferHandler
+    events:
+      - http:
+          path: offers
+          method: post
 ```
 
 
