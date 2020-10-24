@@ -6,7 +6,7 @@ This repo creates the backend API to connect the AWS RDS database with the Prett
 - Java 8
 - Maven
 - Serverless Framework 
-- An AWS account (Lambda, RDS)
+- AWS Lambda, RDS (MySQL 5.7)
 
 ## Setup
 Download or clone this repo.
