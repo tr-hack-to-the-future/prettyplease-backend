@@ -43,6 +43,7 @@ functions:
       - http:
           path: sponsors/{sponsorId}
           method: get
+          cors: true
 
 # charity table
   getcharity:
@@ -130,6 +131,15 @@ functions:
       - http:
           path: offers
           method: post
+          cors: true
+
+# PUT
+  acceptoffer:
+    handler: com.prettyplease.OfferHandler
+    events:
+      - http:
+          path: offers/{requestId}
+          method: put
           cors: true
 
 

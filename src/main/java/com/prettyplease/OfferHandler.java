@@ -23,18 +23,14 @@ public class OfferHandler implements RequestHandler<Map<String, Object>, ApiGate
     private String DB_NAME = System.getenv("DB_NAME");
     private String DB_USER = System.getenv("DB_USER");
     private String DB_PASSWORD = System.getenv("DB_PASSWORD");
-    //    private static final String getSql = "SELECT sponsorId, name, description, imageUrl, webUrl, createdAt FROM prettyplease.Sponsor WHERE sponsorId = ?";
     private static final String createSql = "INSERT INTO prettyplease.SponsorOffer (offerId, sponsorId, requestId, offerStatus, offerAmount, isSingleEvent, offerDurationInYears, createdAt) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, current_timestamp());";
+    private static final String putOfferSql = "UPDATE prettyplease.FundRequest SET requestStatus = 'ACCEPTED' WHERE requestId = ?;";
+    private static final String putRequestSql = "UPDATE prettyplease.SponsorOffer SET offerStatus = 'ACCEPTED' WHERE requestId = ?;";
+
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
-// TODO remove logging
-        LOG.info("\nreceived: {}\n", input);
-//        String httpMethod = (String)input.get("httpMethod");
-//        LOG.info("\nHttp Method: {}\n", httpMethod); // e.g. httpMethod=GET
-//        LOG.info("\nResource: {}\n", (String)input.get("resource")); // e.g. {resource=/sponsor/{sponsorId}
-
         String httpMethod = (String) input.get("httpMethod");
         Object response = null;
         int statusCode = HttpStatus.OK;   // default to success
@@ -43,27 +39,26 @@ public class OfferHandler implements RequestHandler<Map<String, Object>, ApiGate
             LOG.info("GET Sponsor Offers function not yet created.");
             statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
             response = "GET Offers function not yet created.";
-
-//            try {
-//                response = getSponsors(input);
-//            } catch (ClassNotFoundException e) {
-//                LOG.info("Problem setting up database connection: {}", e.getMessage());
-//                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
-//                response = e.getMessage();
-//            } catch (SQLException e) {
-//                LOG.error("Database/SQL problem: {}", e.getMessage());
-//                statusCode = HttpStatus.CONFLICT;   // Conflict
-//                response = e.getMessage();
-//            }
         } else if ("POST".equalsIgnoreCase((httpMethod))) {
-//            String body = (String) input.get("body");
-//            LOG.info("\nbody: {}\n", body); // e.g. POST JSON string
+            LOG.info("\nPOST body: {}\n", (String) input.get("body"));
             try {
                 response = createOffer((String) input.get("body"));
             } catch (IOException e) {
                 LOG.info("Problem parsing request: {}", e.getMessage());
                 statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
                 response = e.getMessage();
+            } catch (ClassNotFoundException e) {
+                LOG.info("Problem setting up database connection: {}", e.getMessage());
+                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
+                response = e.getMessage();
+            } catch (SQLException e) {
+                LOG.error("Database/SQL problem: {}", e.getMessage());
+                statusCode = HttpStatus.CONFLICT;   // Conflict
+                response = e.getMessage();
+            }
+        } else if ("PUT".equalsIgnoreCase(httpMethod)) {
+            try {
+                response = updateStatusToAccepted(input);
             } catch (ClassNotFoundException e) {
                 LOG.info("Problem setting up database connection: {}", e.getMessage());
                 statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
@@ -85,38 +80,34 @@ public class OfferHandler implements RequestHandler<Map<String, Object>, ApiGate
                 .build();
     }
 
-//
-//    private List<Sponsor> getSponsors(Map<String, Object> input) throws SQLException, ClassNotFoundException {
-//        List<Sponsor> sponsors = new ArrayList<>();
-//        String sponsorId = (String) ((Map) input.get("pathParameters")).get("sponsorId");
-//        try (
-//                Connection connection = getDatabaseConnection();
-//                PreparedStatement preparedStatement = connection.prepareStatement(getSql);
-//        ) {
-//            preparedStatement.setString(1, sponsorId);
-//            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-//                while (resultSet.next()) {
-//                    buildSponsorFromDB(sponsors, resultSet);
-//                }
-//            }
-//        }
-//        return sponsors;
-//    }
-//
-//    private void buildSponsorFromDB(List<Sponsor> sponsors, ResultSet resultSet) throws SQLException {
-//        String id = resultSet.getString("sponsorId");
-//        String name = resultSet.getString("name");
-//        String description = resultSet.getString("description");
-//        String imageUrl = resultSet.getString("imageUrl");
-//        String webUrl = resultSet.getString("webUrl");
-//        Date createdAt = resultSet.getTimestamp("createdAt");
-//        Sponsor sponsor = new Sponsor(id, name, description);
-//        sponsor.setImageUrl(imageUrl);
-//        sponsor.setWebUrl(webUrl);
-//        sponsor.setCreatedAt(createdAt);
-//
-//        sponsors.add(sponsor);
-//    }
+
+    private Object updateStatusToAccepted(Map<String, Object> input) throws ClassNotFoundException, SQLException {
+        String id = "";
+        String requestId = (String) ((Map) input.get("pathParameters")).get("requestId");
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement updateRequestStatement = connection.prepareStatement(putRequestSql);
+                PreparedStatement updateOfferStatement = connection.prepareStatement(putOfferSql);
+        ) {
+            // update the status to ACCEPTED for the request and the sponsor offer
+            updateRequestStatement.setString(1, requestId.toString());
+            int requestRows = updateRequestStatement.executeUpdate();
+            updateOfferStatement.setString(1, requestId.toString());
+            int offerRows = updateOfferStatement.executeUpdate();
+            LOG.info("\n" + updateRequestStatement.toString() + "\n");
+            LOG.info("\n" + updateOfferStatement.toString() + "\n");
+            if (requestRows + offerRows == 2) {
+                id = requestId;
+                LOG.info("Updated ACCEPTED status for requestId: " + requestId + ". Updated {" + requestRows  + "} of 1 FundRequest rows and {" + offerRows + "} of 1 SponsorOffer rows.");
+            } else {
+                // throw an exception if the fundrequest and sponsoroffer rows are not updated
+                // can be an input data issue, so this may not be a database problem
+                throw new SQLException("Problem updating ACCEPTED status for requestId: " + requestId + ". Updated {" + requestRows  + "} of 1 FundRequest rows and {" + offerRows + "} of 1 SponsorOffer rows.");
+            }
+        }
+        return id;
+    }
+
 
     private String createOffer(String body) throws ClassNotFoundException, SQLException, IOException {
         ObjectMapper mapper = new ObjectMapper();

@@ -36,7 +36,7 @@ A GET will return the full details of the offer, including sponsor, request and 
 GET   charityoffers/{charityId}
 GET   sponsoroffers/{sponsorId}
 POST  offers
-PUT   offers/{offerid}
+PUT   offers/{requestid}
 -- 
 ```
 

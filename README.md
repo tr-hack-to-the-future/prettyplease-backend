@@ -125,6 +125,14 @@ method: get
       - http:
           path: offers
           method: post
+
+# PUT
+  acceptoffer:
+    handler: com.prettyplease.OfferHandler
+    events:
+      - http:
+          path: offers/{requestId}
+          method: put
 ```
 
 
