@@ -23,8 +23,8 @@ POST  charities
 A request contains the details of a charity's request to raise funds. This will usually consist of an amount, a duration of the agreement (single event or multiple-year partnership) and an incentive for the sponsor.  
 A GET for a request will usually return details of the charity that raised the request.
 ```
-GET   sponsorrequests/{requestId} 
-GET   requests
+GET   sponsorrequests/{requestId}
+GET   requests/{requestId}
 POST  requests
 PUT   requests/{requestId} 
 ```

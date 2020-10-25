@@ -57,20 +57,12 @@ method: get
           path: charities/{charityId}
           method: get
 
-# get the request including the charity details
-  getrequest:
-    handler: com.prettyplease.RequestHandler
-    events:
-      - http:
-          path: requests/{requestId}
-          method: get
-
 # get detailed request by requestId
   getsponsorrequest:
     handler: com.prettyplease.CharityRequestHandler
     events:
       - http:
-          path: sponsorrequests/{requestId}
+          path: requests/{requestId}
           method: get
 
 # list of detailed requests
@@ -79,6 +71,14 @@ method: get
     events:
       - http:
           path: requests
+          method: get
+
+# list of detailed requests, excluding sponsored by the sponsorId 
+  listopenrequests:
+    handler: com.prettyplease.SponsorRequestHandler
+    events:
+      - http:
+          path: sponsorrequests/{sponsorId}
           method: get
 
   # list of detailed offers by charityid

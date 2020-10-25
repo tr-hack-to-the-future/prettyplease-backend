@@ -56,24 +56,17 @@ functions:
 
 # detailed responses are multiple joined tables
 # always going to get the request with the charity details
-  getrequest:
-    handler: com.prettyplease.RequestHandler
-    events:
-      - http:
-          path: requests/{requestId}
-          method: get
-          cors: true
 
 # get detailed request by requestId
   getsponsorrequest:
     handler: com.prettyplease.CharityRequestHandler
     events:
       - http:
-          path: sponsorrequests/{requestId}
+          path: requests/{requestId}
           method: get
           cors: true
 
-# list of detailed requests
+  # list of detailed requests
   listdetailedrequests:
     handler: com.prettyplease.CharityRequestHandler
     events:
@@ -81,6 +74,15 @@ functions:
           path: requests
           method: get
           cors: true
+
+  listopenrequests:
+    handler: com.prettyplease.SponsorRequestHandler
+    events:
+      - http:
+          path: sponsorrequests/{sponsorId}
+          method: get
+          cors: true
+
 
   # list of detailed offers by charityid
   listcharityoffers:
@@ -143,63 +145,10 @@ functions:
           cors: true
 
 
-
-#  listrequests:
+#  getrequest:
 #    handler: com.prettyplease.RequestHandler
-#    events:
-#      - http:
-#          path: requests
-#          method: get
-#          cors: true
-
-#  listrequestsbystatus:
-#    handler: com.prettyplease.RequestHandler
-#    events:
-#      - http:
-#          path: requests/{status}??? or query parameter?
-#          method: get
-#          cors: true
-
-
-
-#  updaterequest:
-#    handler: com.prettyplease.UpdateRequestHandler
 #    events:
 #      - http:
 #          path: requests/{requestId}
-#          method: put
-#          cors: true
-#
-#  getoffer:
-#    handler: com.prettyplease.GetOfferHandler
-#    events:
-#      - http:
-#          path: offers/{offerId}
 #          method: get
-#          cors: true
-
-
-
-#  listoffers:
-#    handler: com.prettyplease.ListOfferHandler
-#    events:
-#      - http:
-#          path: offers
-#          method: get
-#          cors: true
-#
-#  createoffer:
-#    handler: com.prettyplease.CreateOfferHandler
-#    events:
-#      - http:
-#          path: offers
-#          method: post
-#          cors: true
-#
-#  updateoffer:
-#    handler: com.prettyplease.UpdateOfferHandler
-#    events:
-#      - http:
-#          path: offers/{offerId}
-#          method: put
 #          cors: true
