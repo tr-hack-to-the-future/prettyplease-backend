@@ -1,12 +1,18 @@
 # Pretty Please backend functions
 
-This repo creates the backend API to connect the AWS RDS database with the Pretty Please front-end React application.  
+This repo creates the backend API for connection to an AWS RDS database, to be consumed by the Pretty Please front-end React application, available [here](https://github.com/tr-hack-to-the-future/prettyplease-frontend).  
 
-## Requirements
+The hosted version of the application is available here: (https://tr-hack-to-the-future.github.io/prettyplease-frontend/) 
+
+## Technology
+This project used the following:
 - Java 8
 - Maven
 - Serverless Framework 
-- AWS Lambda, RDS (MySQL 5.7)
+- Terraform
+- AWS Lambda and API Gateway
+- AWS RDS (MySQL 5.7)
+
 
 ## Setup
 Download or clone this repo.

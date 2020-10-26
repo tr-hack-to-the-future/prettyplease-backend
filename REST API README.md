@@ -10,6 +10,17 @@ Sponsors are the organisation or individuals who are looking to find donate fund
 GET   sponsors/{sponsorId}
 POST  sponsors 
 ```
+##### POST JSON
+POST /sponsors will create a new sponsor with a JSON payload in the following format: 
+```json
+{
+    "sponsorId" : "ABC123",
+    "name": "Sponsor Name",
+    "description": "Sponsor description",
+    "imageUrl": "URL to the image file/logo of the sponsor",
+    "webUrl": "URL to the sponsor website"
+}
+```
 
 ### Charities
 
@@ -18,6 +29,19 @@ These are organisations or individuals that are seeking to raise money to pay fo
 GET   charities/{charityId}
 POST  charities 
 ```
+##### POST JSON
+POST /charities will create a new charity with a JSON payload in the following format: 
+```json
+{
+    "charityId" : "ABC123",
+    "name": "Charity Name",
+    "description": "Charity description",
+    "imageUrl": "URL to the image file/logo of the sponsor",
+    "webUrl": "URL to the charity website"
+}
+```
+
+
 
 ### Requests
 A request contains the details of a charity's request to raise funds. This will usually consist of an amount, a duration of the agreement (single event or multiple-year partnership) and an incentive for the sponsor.  
@@ -25,8 +49,26 @@ A GET for a request will usually return details of the charity that raised the r
 ```
 GET   sponsorrequests/{requestId}
 GET   requests/{requestId}
-POST  requests
 PUT   requests/{requestId} 
+POST  requests
+```
+##### POST JSON
+POST /requests will create a new fund request with a JSON payload in the following format: 
+```json
+    {
+        "charityId": "ABC123",
+        "eventDescription": "Description of the fundraising project or event",
+        "incentive": "A description of the incentive offered to the sponsors",
+        "amountRequested": 9000,
+        "amountAgreed": 9000,
+        "isSingleEvent": false,
+        "durationInYears": 2,
+        "agreedDurationInYears": 2,
+        "requestStatus": "OPEN",
+        "requestDate": 1603065600000,
+        "dueDate": null,
+        "createdAt": 1603106007000
+    }
 ```
 
 ### Offers
@@ -39,7 +81,18 @@ POST  offers
 PUT   offers/{requestid}
 -- 
 ```
-
+##### POST JSON
+POST /offers will create a new sponsor offer with a JSON payload in the following format: 
+```json
+    {
+        "sponsorId": "DEF456",
+        "requestId": "FRA456",
+        "offerStatus": "PENDING",
+        "offerAmount": 9000,
+        "isSingleEvent": false,
+        "offerDurationInYears": 2
+    }
+```
 
 ### Combined Data
 

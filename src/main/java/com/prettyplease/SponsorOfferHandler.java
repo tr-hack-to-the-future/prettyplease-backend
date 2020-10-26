@@ -53,7 +53,7 @@ public class SponsorOfferHandler implements com.amazonaws.services.lambda.runtim
         headers.put("Access-Control-Allow-Headers", "Content-Type");
 
         return ApiGatewayResponse.builder()
-                .setStatusCode(200)
+                .setStatusCode(statusCode)
                 .setObjectBody(response)
                 .setHeaders(headers)
                 .build();

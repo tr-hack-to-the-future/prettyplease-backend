@@ -130,7 +130,7 @@ public class OfferHandler implements RequestHandler<Map<String, Object>, ApiGate
             // MySQL 5 uses TinyInt instead of Boolean
             preparedStatement.setInt(6, (offer.isSingleEvent() ? 1 : 0));
             preparedStatement.setInt(7, offer.getOfferDurationInYears());
-            LOG.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + preparedStatement.toString() + "\n");
+            LOG.info("\n" + preparedStatement.toString() + "\n");
 
             int rowsCreated = preparedStatement.executeUpdate();
             if (rowsCreated == 1) {

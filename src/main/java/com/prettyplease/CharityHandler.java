@@ -51,7 +51,7 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
             try {
                 JSONObject postBody = new JSONObject((String) input.get("body"));
                 response = createCharity(postBody);
-            } catch (JSONException e) {
+            } catch (NullPointerException | JSONException e) {
                 LOG.info("Problem parsing POST data: {}", e.getMessage());
                 statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
                 response = e.getMessage();
@@ -65,13 +65,12 @@ public class CharityHandler implements RequestHandler<Map<String, Object>, ApiGa
                 response = e.getMessage();
             }
         }
-
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Access-Control-Allow-Origin", "*");
         headers.put("Access-Control-Allow-Headers", "Content-Type");
 
         return ApiGatewayResponse.builder()
-                .setStatusCode(200)
+                .setStatusCode(statusCode)
                 .setObjectBody(response)
                 .setHeaders(headers)
                 .build();
