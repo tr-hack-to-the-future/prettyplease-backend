@@ -31,6 +31,8 @@ private static final String getSql = "SELECT f.requestId, f.charityId, f.eventDe
     private static final String createSql = "INSERT INTO prettyplease.FundRequest " +
             "(requestId, charityId , eventDescription, incentive, amountRequested, amountAgreed, isSingleEvent, durationInYears, agreedDurationInYears, requestStatus, requestDate, dueDate, createdAt) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp())";
+    private static final String updateRequestStatusSql = "UPDATE prettyplease.FundRequest SET requestStatus = 'ACCEPTED' WHERE requestId = ?;";
+
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
@@ -58,6 +60,18 @@ private static final String getSql = "SELECT f.requestId, f.charityId, f.eventDe
                 LOG.error("Problem parsing POST data: {}", e.getMessage());
                 statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
                 response = e.getMessage();
+            } catch (ClassNotFoundException e) {
+                LOG.info("Problem setting up database connection: {}", e.getMessage());
+                statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
+                response = e.getMessage();
+            } catch (SQLException e) {
+                LOG.error("Database/SQL problem: {}", e.getMessage());
+                statusCode = HttpStatus.CONFLICT;   // Conflict
+                response = e.getMessage();
+            }
+        } else if ("PUT".equalsIgnoreCase(httpMethod)) {
+            try {
+                response = updateRequestStatus(input);
             } catch (ClassNotFoundException e) {
                 LOG.info("Problem setting up database connection: {}", e.getMessage());
                 statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
@@ -118,23 +132,6 @@ private static final String getSql = "SELECT f.requestId, f.charityId, f.eventDe
         requests.add(charityRequest);
     }
 
-//    private List<FundRequest> getRequests(Map<String, Object> input) throws SQLException, ClassNotFoundException {
-//        List<FundRequest> requests = new ArrayList<>();
-//        String requestId = (String) ((Map) input.get("pathParameters")).get("requestId");
-//        try (
-//                Connection connection = getDatabaseConnection();
-//                PreparedStatement preparedStatement = connection.prepareStatement(getSql);
-//        ) {
-//            preparedStatement.setString(1, requestId);
-//            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-//                while (resultSet.next()) {
-//                    buildFundRequestFromDB(requests, resultSet);
-//                }
-//            }
-//        }
-//        return requests;
-//    }
-
     private void buildFundRequestFromDB(List<FundRequest> requests, ResultSet resultSet) throws SQLException {
         String requestId = resultSet.getString("requestId");
         String charityId = resultSet.getString("charityId");
@@ -190,15 +187,14 @@ private static final String getSql = "SELECT f.requestId, f.charityId, f.eventDe
             preparedStatement.setInt(8, postBody.getInt("durationInYears"));
             preparedStatement.setInt(9, postBody.getInt("agreedDurationInYears"));
             preparedStatement.setString(10, postBody.getString("requestStatus"));
-            // TODO is request Date the current date?
-            // TODO fix these dates later
+            // TODO these dates are part of the advanced feature set
 //            LocalDate localDate = LocalDate.now();
 //            LOG.info("\nlocal date " + localDate + "\n");
             preparedStatement.setDate(11, null);
             preparedStatement.setDate(12, null);
 //            preparedStatement.setDate(11, java.sql.Date.valueOf(localDate));
 //            preparedStatement.setDate(12, parseDate(postBody.getString("dueDate")));
-            LOG.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + preparedStatement.toString() + "\n");
+            LOG.info("\n" + preparedStatement.toString() + "\n");
             int rowsCreated = preparedStatement.executeUpdate();
             if (rowsCreated == 1) {
                 id = requestId.toString();
@@ -207,6 +203,27 @@ private static final String getSql = "SELECT f.requestId, f.charityId, f.eventDe
         return id;
     }
 
+    private Object updateRequestStatus(Map<String, Object> input) throws ClassNotFoundException, SQLException {
+        String id = "";
+        String requestId = (String) ((Map) input.get("pathParameters")).get("requestId");
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement updateStatement = connection.prepareStatement(updateRequestStatusSql);
+        ) {
+            // update the request status to ACCEPTED
+            updateStatement.setString(1, requestId.toString());
+            int updatedRows = updateStatement.executeUpdate();
+            LOG.info("\n" + updateStatement.toString() + " : rows updated = " + updatedRows + "\n");
+            if (updatedRows == 1) {
+                id = requestId;
+                LOG.info("Updated ACCEPTED status for requestId: " + requestId);
+            } else {
+                // can be an input data issue, so this may not be a database problem
+                throw new SQLException("Problem updating FundRequest status for requestId: " + requestId);
+            }
+        }
+        return id;
+    }
 
     private Connection getDatabaseConnection() throws SQLException, ClassNotFoundException {
         Class.forName("com.mysql.jdbc.Driver");

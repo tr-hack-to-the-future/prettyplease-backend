@@ -140,7 +140,7 @@ functions:
     handler: com.prettyplease.RequestHandler
     events:
       - http:
-          path: request/{requestId}
+          path: requests/{requestId}
           method: put
           cors: true
 
@@ -149,15 +149,6 @@ functions:
     events:
       - http:
           path: offers/{offerId}
-          method: put
-          cors: true
-
-  # to be deleted
-  acceptoffer:
-    handler: com.prettyplease.OfferHandler
-    events:
-      - http:
-          path: offers/{requestId}
           method: put
           cors: true
 

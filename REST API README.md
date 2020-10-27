@@ -77,8 +77,8 @@ A GET will return the full details of the offer, including sponsor, request and 
 ```
 GET   charityoffers/{charityId}
 GET   sponsoroffers/{sponsorId}
+PUT   offers/{offerId}
 POST  offers
-PUT   offers/{requestid}
 -- 
 ```
 ##### POST JSON

@@ -25,8 +25,7 @@ public class OfferHandler implements RequestHandler<Map<String, Object>, ApiGate
     private String DB_PASSWORD = System.getenv("DB_PASSWORD");
     private static final String createSql = "INSERT INTO prettyplease.SponsorOffer (offerId, sponsorId, requestId, offerStatus, offerAmount, isSingleEvent, offerDurationInYears, createdAt) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, current_timestamp());";
-    private static final String putOfferSql = "UPDATE prettyplease.FundRequest SET requestStatus = 'ACCEPTED' WHERE requestId = ?;";
-    private static final String putRequestSql = "UPDATE prettyplease.SponsorOffer SET offerStatus = 'ACCEPTED' WHERE requestId = ?;";
+    private static final String updateOfferStatusSql = "UPDATE prettyplease.SponsorOffer SET offerStatus = 'ACCEPTED' WHERE offerId = ?;";
 
 
     @Override
@@ -58,7 +57,7 @@ public class OfferHandler implements RequestHandler<Map<String, Object>, ApiGate
             }
         } else if ("PUT".equalsIgnoreCase(httpMethod)) {
             try {
-                response = updateStatusToAccepted(input);
+                response = updateOfferStatus(input);
             } catch (ClassNotFoundException e) {
                 LOG.info("Problem setting up database connection: {}", e.getMessage());
                 statusCode = HttpStatus.BAD_REQUEST;   // Bad Request
@@ -81,31 +80,23 @@ public class OfferHandler implements RequestHandler<Map<String, Object>, ApiGate
     }
 
 
-    private Object updateStatusToAccepted(Map<String, Object> input) throws ClassNotFoundException, SQLException {
+    private Object updateOfferStatus(Map<String, Object> input) throws ClassNotFoundException, SQLException {
         String id = "";
-        String requestId = (String) ((Map) input.get("pathParameters")).get("requestId");
+        String offerId = (String) ((Map) input.get("pathParameters")).get("offerId");
         try (
                 Connection connection = getDatabaseConnection();
-                PreparedStatement updateRequestStatement = connection.prepareStatement(putRequestSql);
-                PreparedStatement updateOfferStatement = connection.prepareStatement(putOfferSql);
+                PreparedStatement updateStatement = connection.prepareStatement(updateOfferStatusSql);
         ) {
-            // update the status to ACCEPTED for the request and the sponsor offer
-            updateRequestStatement.setString(1, requestId.toString());
-            int requestRows = updateRequestStatement.executeUpdate();
-            LOG.info("\n" + updateRequestStatement.toString() + " : rows updated = " + requestRows + "\n");
-            updateOfferStatement.setString(1, requestId.toString());
-            int offerRows = updateOfferStatement.executeUpdate();
-            LOG.info("\n" + updateOfferStatement.toString() + " : rows updated = " + offerRows + "\n");
-            if (requestRows + offerRows == 2) {
-                id = requestId;
-                LOG.info("Updated ACCEPTED status for requestId: " + requestId + ". Updated {" + requestRows  + "} of 1 FundRequest rows and {" + offerRows + "} of 1 SponsorOffer rows.");
+            // update the sponsor offer status to ACCEPTED
+            updateStatement.setString(1, offerId.toString());
+            int updatedRows = updateStatement.executeUpdate();
+            LOG.info("\n" + updateStatement.toString() + " : rows updated = " + updatedRows + "\n");
+            if (updatedRows == 1) {
+                id = offerId;
+                LOG.info("Updated ACCEPTED status for offerId: " + offerId);
             } else {
-                id = requestId;
-                // log an error if the fundrequest and sponsoroffer rows are not updated or partially updated
                 // can be an input data issue, so this may not be a database problem
-                final String msg = "Problem updating ACCEPTED status for requestId: " + requestId + ". Updated {" + requestRows  + "} of 1 FundRequest rows and {" + offerRows + "} of 1 SponsorOffer rows.";
-                LOG.error(msg);
-                throw new SQLException(msg);
+                throw new SQLException("Problem updating SponsorOffer status for offerId: " + offerId);
             }
         }
         return id;

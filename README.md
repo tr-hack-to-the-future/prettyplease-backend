@@ -133,11 +133,18 @@ method: get
           method: post
 
 # PUT
-  acceptoffer:
+  updaterequest:
+    handler: com.prettyplease.RequestHandler
+    events:
+      - http:
+          path: request/{requestId}
+          method: put
+
+  updateoffer:
     handler: com.prettyplease.OfferHandler
     events:
       - http:
-          path: offers/{requestId}
+          path: offers/{offerId}
           method: put
 ```
 
