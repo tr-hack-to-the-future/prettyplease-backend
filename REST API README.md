@@ -66,8 +66,7 @@ POST /requests will create a new fund request with a JSON payload in the followi
         "agreedDurationInYears": 2,
         "requestStatus": "OPEN",
         "requestDate": 1603065600000,
-        "dueDate": null,
-        "createdAt": 1603106007000
+        "dueDate": null
     }
 ```
 
