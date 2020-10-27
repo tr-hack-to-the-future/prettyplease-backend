@@ -27,16 +27,16 @@ provider:
     DB_USER: ${file(./config.dev.json):DB_USER}
     DB_PASSWORD: ${file(./config.dev.json):DB_PASSWORD}
 
-# you can overwrite defaults here
-#  stage: dev
+  # you can overwrite defaults here
+  #  stage: dev
   region: eu-west-2
 
 package:
   artifact: target/prettyplease-dev.jar
 
 functions:
-# GET
-# sponsor table
+  # GET
+  # sponsor table
   getsponsor:
     handler: com.prettyplease.SponsorHandler
     events:
@@ -45,7 +45,7 @@ functions:
           method: get
           cors: true
 
-# charity table
+  # charity table
   getcharity:
     handler: com.prettyplease.CharityHandler
     events:
@@ -54,10 +54,10 @@ functions:
           method: get
           cors: true
 
-# detailed responses are multiple joined tables
-# always going to get the request with the charity details
+  # detailed responses are multiple joined tables
+  # always going to get the request with the charity details
 
-# get detailed request by requestId
+  # get detailed request by requestId
   getsponsorrequest:
     handler: com.prettyplease.CharityRequestHandler
     events:
@@ -93,7 +93,7 @@ functions:
           method: get
           cors: true
 
-# list of detailed offers by sponsorid
+  # list of detailed offers by sponsorid
   listsponsoroffers:
     handler: com.prettyplease.SponsorOfferHandler
     events:
@@ -102,7 +102,7 @@ functions:
           method: get
           cors: true
 
-# POST
+  # POST
   createsponsor:
     handler: com.prettyplease.SponsorHandler
     events:
@@ -135,7 +135,24 @@ functions:
           method: post
           cors: true
 
-# PUT
+  # PUT
+  updaterequest:
+    handler: com.prettyplease.RequestHandler
+    events:
+      - http:
+          path: request/{requestId}
+          method: put
+          cors: true
+
+  updateoffer:
+    handler: com.prettyplease.OfferHandler
+    events:
+      - http:
+          path: offers/{offerId}
+          method: put
+          cors: true
+
+  # to be deleted
   acceptoffer:
     handler: com.prettyplease.OfferHandler
     events:
@@ -144,11 +161,3 @@ functions:
           method: put
           cors: true
 
-
-#  getrequest:
-#    handler: com.prettyplease.RequestHandler
-#    events:
-#      - http:
-#          path: requests/{requestId}
-#          method: get
-#          cors: true

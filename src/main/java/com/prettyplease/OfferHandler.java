@@ -92,17 +92,20 @@ public class OfferHandler implements RequestHandler<Map<String, Object>, ApiGate
             // update the status to ACCEPTED for the request and the sponsor offer
             updateRequestStatement.setString(1, requestId.toString());
             int requestRows = updateRequestStatement.executeUpdate();
+            LOG.info("\n" + updateRequestStatement.toString() + " : rows updated = " + requestRows + "\n");
             updateOfferStatement.setString(1, requestId.toString());
             int offerRows = updateOfferStatement.executeUpdate();
-            LOG.info("\n" + updateRequestStatement.toString() + "\n");
-            LOG.info("\n" + updateOfferStatement.toString() + "\n");
+            LOG.info("\n" + updateOfferStatement.toString() + " : rows updated = " + offerRows + "\n");
             if (requestRows + offerRows == 2) {
                 id = requestId;
                 LOG.info("Updated ACCEPTED status for requestId: " + requestId + ". Updated {" + requestRows  + "} of 1 FundRequest rows and {" + offerRows + "} of 1 SponsorOffer rows.");
             } else {
-                // throw an exception if the fundrequest and sponsoroffer rows are not updated
+                id = requestId;
+                // log an error if the fundrequest and sponsoroffer rows are not updated or partially updated
                 // can be an input data issue, so this may not be a database problem
-                throw new SQLException("Problem updating ACCEPTED status for requestId: " + requestId + ". Updated {" + requestRows  + "} of 1 FundRequest rows and {" + offerRows + "} of 1 SponsorOffer rows.");
+                final String msg = "Problem updating ACCEPTED status for requestId: " + requestId + ". Updated {" + requestRows  + "} of 1 FundRequest rows and {" + offerRows + "} of 1 SponsorOffer rows.";
+                LOG.error(msg);
+                throw new SQLException(msg);
             }
         }
         return id;
