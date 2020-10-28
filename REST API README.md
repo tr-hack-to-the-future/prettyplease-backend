@@ -1,11 +1,22 @@
 # Pretty Please REST API
 
-The Pretty Please API is organised around REST. Our API returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.
+This API is organised around REST and is the back for the Pretty Please charity marketplace application developed as part of the eight week [Tech Returners](https://www.techreturners.com/) Your Journey into Tech course. The API returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.
 
 
 ## ENDPOINTS
+The API exposes the following endpoints:
+
+### Base Endpoint 
+https://ae9g7g3iyl.execute-api.eu-west-2.amazonaws.com/dev/
+
+
 ### Sponsors
 Sponsors are the organisation or individuals who are looking to find donate funds to help charity projects. A sponsor will have a name, an image or logo, and a description of their organisation's work and values, to help a charity find the right sponsorship partner.
+
+```
+GET   sponsors/{sponsorId}
+```
+Responds with JSON containing all sponsors  
 ```
 GET   sponsors/{sponsorId}
 POST  sponsors 
@@ -48,6 +59,7 @@ A request contains the details of a charity's request to raise funds. This will 
 A GET for a request will usually return details of the charity that raised the request.
 ```
 GET   sponsorrequests/{requestId}
+GET   charityrequests/{charityId}
 GET   requests/{requestId}
 PUT   requests/{requestId} 
 POST  requests

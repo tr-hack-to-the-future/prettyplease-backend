@@ -2,7 +2,7 @@
 
 This repo creates the backend API for connection to an AWS RDS database, to be consumed by the Pretty Please front-end React application, available [here](https://github.com/tr-hack-to-the-future/prettyplease-frontend).  
 
-The hosted version of the application is available here: (https://tr-hack-to-the-future.github.io/prettyplease-frontend/) 
+The hosted version of the application is available here: https://tr-hack-to-the-future.github.io/prettyplease-frontend/ 
 
 ## Technology
 This project used the following:
@@ -13,13 +13,22 @@ This project used the following:
 - AWS Lambda and API Gateway
 - AWS RDS (MySQL 5.7)
 
-
 ## Setup
-Download or clone this repo.
+Download or clone this repo. The codebase uses Maven for dependency management and [Serverless Framework](https://www.serverless.com/) for deploying  to AWS Lambda.
+
+To build the application:
+```shell script
+mvn clean install 
+``` 
+To deploy the Lambda functions to AWS:
+```shell script
+serverless deploy
+```
+
 
 ## Configuration
-- AWS keys set up for your Serverless installation 
-- Create a config.dev.json file at the project level containing the following name/value pairs:
+- AWS keys set up for your Serverless installation to be referenced from the project [serverless.yml](./serverless.yml) file.  
+- Create a **config.dev.json** file at the project level containing the following name/value pairs:
 ```json
 {
   "DB_HOST" : "<database_host_name>",
@@ -30,10 +39,11 @@ Download or clone this repo.
 ```
 
 ## Deployment
-To deploy the functions run:
+To deploy the Lambda functions run:
 ```shell script
 serverless deploy 
 ```
+This will provision the required API Gateway and upload the JAR file to AWS Lambda. 
 
 ## REST API
 The definition of the REST API can be found [here](./REST API README.md).
@@ -79,12 +89,20 @@ method: get
           path: requests
           method: get
 
-# list of detailed requests, excluding sponsored by the sponsorId 
+# all requests, excluding those sponsored by the selected sponsorId
   listopenrequests:
     handler: com.prettyplease.SponsorRequestHandler
     events:
       - http:
           path: sponsorrequests/{sponsorId}
+          method: get
+
+# requests by charityId
+  listcharityrequests:
+    handler: com.prettyplease.CharityGetRequestHandler
+    events:
+      - http:
+          path: charityrequests/{charityId}
           method: get
 
   # list of detailed offers by charityid

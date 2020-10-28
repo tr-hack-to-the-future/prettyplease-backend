@@ -75,6 +75,7 @@ functions:
           method: get
           cors: true
 
+# all requests, excluding those sponsored by the selected sponsorId
   listopenrequests:
     handler: com.prettyplease.SponsorRequestHandler
     events:
@@ -83,8 +84,17 @@ functions:
           method: get
           cors: true
 
+# requests by charityId
+  listcharityrequests:
+    handler: com.prettyplease.CharityGetRequestHandler
+    events:
+      - http:
+          path: charityrequests/{charityId}
+          method: get
+          cors: true
 
-  # list of detailed offers by charityid
+
+  # list of detailed offers by charityId
   listcharityoffers:
     handler: com.prettyplease.CharityOfferHandler
     events:
