@@ -46,7 +46,7 @@ serverless deploy
 This will provision the required API Gateway and upload the JAR file to AWS Lambda. 
 
 ## REST API
-The definition of the REST API can be found [here](./REST API README.md).
+The definition of the REST API can be found [here](https://github.com/tr-hack-to-the-future/prettyplease-backend/blob/main/REST%20API%20README.md).
 
 
 ## Lambda HTTP Functions
